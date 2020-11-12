@@ -1,0 +1,40 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "C/C++: g++.exe build active file-SFML",
+            "command": "C:\\MinGW\\bin\\g++.exe",
+            "args": [
+                "-g",
+                "main.cpp",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-IC:\\SFML\\include",
+                //"-IC:\\GLFW\\include",
+                "-LC:\\SFML\\lib",
+                "-lsfml-graphics",
+                "-lsfml-audio",
+                "-lsfml-window",
+                "-lsfml-system",
+                //"-LC:\\GLFW\\lib",
+                //"-lglfw3",
+                //"-lGLU",
+                //"-lGL"
+                //"-lopengl32g++"
+                
+
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ],
+    "version": "2.0.0"
+}
