@@ -43,6 +43,12 @@ int main() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)){
             player->backward(deltaT);
         }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)){
+            player->rotateRight(deltaT);
+        }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)){
+            player->rotateLeft(deltaT);
+        }
     }
     return 0;
 }
