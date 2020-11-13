@@ -1,12 +1,14 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <math.h>
 #include "Map.hpp"
 class Player : public sf::Drawable{
 private:
     double radius;
     sf::CircleShape *shape;
     double moveSpeed;
+    double rotationSpeed;
     double posX;
     double posY; //x and y start position
     double dirX;
@@ -24,6 +26,8 @@ public:
     double getplaneY();
     void forward(sf::Time deltaT);
     void backward(sf::Time deltaT);
+    void rotateRight(sf::Time deltaT);
+    void rotateLeft(sf::Time deltaT);
     ~Player();
 private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
