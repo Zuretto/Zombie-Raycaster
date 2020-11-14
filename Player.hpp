@@ -3,10 +3,10 @@
 #include <iostream>
 #include <math.h>
 #include "Map.hpp"
-class Player : public sf::Drawable{
+class Player{
 private:
-    double radius;
-    sf::CircleShape *shape;
+    Map *worldMap;
+    
     double moveSpeed;
     double rotationSpeed;
     double posX;
@@ -15,11 +15,11 @@ private:
     double dirY; //direction vector
     double planeX;
     double planeY; //FOV
-    Map *map;
+    
 public:
     Player(double xpos, double ypos, double xdir, double ydir, double xplane, double yplane, Map *mapp);
     double getPosX();
-    double getposY();
+    double getPosY();
     double getdirX();
     double getdirY();
     double getplaneX();
@@ -29,11 +29,4 @@ public:
     void rotateRight(sf::Time deltaT);
     void rotateLeft(sf::Time deltaT);
     ~Player();
-private:
-    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-        //target.draw(shape);
-        // ... or use the low-level API
-        // ... or draw with OpenGL directly
-//private:
-//    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 };
