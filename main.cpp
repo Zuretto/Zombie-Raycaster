@@ -4,39 +4,125 @@
 #include <math.h>
 #include "Player.hpp"
 #include "Map.hpp"
-#define screenWidth 480
-#define screenHeight 480
-
+#define casterWidth 1024
+#define casterHeight 720
 
 int main() {
-    Map *map = new Map("test.map", screenWidth, screenHeight);
-    double posX = 22, posY = 12;  //x and y start position
-    double dirX = -1, dirY = 0; //initial direction vector
-    Player *player = new Player(20, 20, 0.5, 0.5, 0, 0.66, map);
-    sf::RenderWindow window2D(sf::VideoMode(screenWidth, screenHeight), "Hello World SFML Window");
-    
+    Map *map = new Map("test.map");
+    auto map_vect = map->getMapVector();
+    Player *player = new Player(1, 1, -1, 0, 0, 1, map);
+    //sf::RenderWindow window2D(sf::VideoMode(screenWidth, screenHeight), "cialo");
+    sf::RenderWindow window3D(sf::VideoMode(casterWidth, casterHeight), "ray casting");
     sf::Clock clock;
     clock.restart();
-    while (window2D.isOpen()) {
+    while ( window3D.isOpen()) {
         sf::Time deltaT = clock.getElapsedTime();
         //std::cout << deltaT.asSeconds() << std::endl;
         clock.restart();
         sf::Event e;
-        while (window2D.pollEvent(e)) {
+        while (window3D.pollEvent(e)) {
             switch (e.type) {
             case sf::Event::EventType::Closed:
-                window2D.close();
+                window3D.close();
                 break;
             default:
                 break;
             }
         }
-        window2D.clear();
-        window2D.draw(*map);
-        //map->draw(window2D, screenWidth, screenHeight);
-        
-        window2D.draw(*player);
-        window2D.display();
+        window3D.clear();
+        sf::RectangleShape sky(sf::Vector2f(casterWidth, casterHeight / 2));
+        sky.setFillColor(sf::Color(108, 158, 222));
+        window3D.draw(sky);
+        sf::RectangleShape floor(sf::Vector2f(casterWidth, casterHeight / 2));
+        floor.move(0, casterHeight/2);
+        floor.setFillColor(sf::Color(56, 68, 82));
+        window3D.draw(floor);
+        for(int x = 0; x < casterWidth; x++){
+            //calculate ray position and direction
+            double cameraX = 2 * x / (double)casterWidth - 1; //x-coordinate in camera space
+            double rayDirX = player->getdirX() + player->getplaneX() * cameraX;
+            double rayDirY = player->getdirY() + player->getplaneY() * cameraX;
+            //which box of the map we're in
+            int mapX = int(player->getPosX());
+            int mapY = int(player->getPosY());
+            //length of ray from current position to next x or y-side
+            double sideDistX;
+            double sideDistY;
+            //length of ray from one x or y-side to next x or y-side
+            double deltaDistX = std::abs(1 / rayDirX);
+            double deltaDistY = std::abs(1 / rayDirY);
+            double perpWallDist;
+            //what direction to step in x or y-direction (either +1 or -1)
+            int stepX;
+            int stepY;
+            int hit = 0; //was there a wall hit?
+            int side; //was a NS or a EW wall hit?
+            //calculate step and initial sideDist
+            if(rayDirX < 0){
+                stepX = -1;
+                sideDistX = (player->getPosX() - mapX) * deltaDistX;
+            }
+            else{
+                stepX = 1;
+                sideDistX = (mapX + 1.0 - player->getPosX()) * deltaDistX;
+            }
+            if(rayDirY < 0){
+                stepY = -1;
+                sideDistY = (player->getPosY() - mapY) * deltaDistY;
+            }
+            else{
+                stepY = 1;
+                sideDistY = (mapY + 1.0 - player->getPosY()) * deltaDistY;
+            }
+            //perform DDA
+            while (hit == 0){
+                //jump to next map square, OR in x-direction, OR in y-direction
+                if(sideDistX < sideDistY){
+                sideDistX += deltaDistX;
+                mapX += stepX;
+                side = 0;
+                }
+                else{
+                sideDistY += deltaDistY;
+                mapY += stepY;
+                side = 1;
+                }
+                //Check if ray has hit a wall
+                if(map_vect[mapX][mapY] > 0) hit = 1;
+            }
+            //Calculate distance projected on camera direction (Euclidean distance will give fisheye effect!)
+            if(side == 0) perpWallDist = (mapX - player->getPosX() + (1 - stepX) / 2) / rayDirX;
+            else          perpWallDist = (mapY - player->getPosY() + (1 - stepY) / 2) / rayDirY;
+            //Calculate height of line to draw on screen
+            int lineHeight = (int)(casterHeight / perpWallDist);
+            //calculate lowest and highest pixel to fill in current stripe
+            int drawStart = -lineHeight / 2 + casterHeight / 2;
+            if (drawStart < 0) drawStart = 0;
+            int drawEnd = lineHeight / 2 + casterHeight / 2;
+            if (drawEnd >= casterHeight) drawEnd = casterHeight - 1;
+            //choose wall color
+            sf::Color color;
+            switch(map_vect[mapX][mapY]){
+                case 1:  color = sf::Color::Magenta;    break; //red
+                case 2:  color = sf::Color::Cyan;       break; //green
+                case 3:  color = sf::Color::Blue;       break; //blue
+                case 4:  color = sf::Color::Red;        break; //white
+                case 5:  color = sf::Color::Red;        break;
+                case 6:  color = sf::Color::Red;        break;
+                default: color = sf::Color::Yellow;     break; //yellow
+            }
+            //give x and y sides different brightness
+            if(side == 1) {color.r /= 2; color.g /= 2; color.b /= 2;}
+            //draw the pixels of the stripe as a vertical line
+            sf::Vertex line[] ={
+                sf::Vertex(sf::Vector2f(x, drawEnd), color),
+                sf::Vertex(sf::Vector2f(x, drawStart), color)
+            };
+            window3D.draw(line, 2, sf::Lines);
+        }
+
+
+        window3D.display();
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)){
             player->forward(deltaT);
         }
