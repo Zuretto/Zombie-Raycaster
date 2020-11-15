@@ -6,18 +6,20 @@
 #include "Map.hpp"
 #define casterWidth 1024
 #define casterHeight 720
+#define texWidth 32
+#define texHeight 32
 
 int main() {
     Map *map = new Map("test.map");
     auto map_vect = map->getMapVector();
-    Player *player = new Player(1, 1, -1, 0, 0, 1, map);
+    Player *player = new Player(5, 5, -1, 0, 0, 1, map);
     //sf::RenderWindow window2D(sf::VideoMode(screenWidth, screenHeight), "cialo");
     sf::RenderWindow window3D(sf::VideoMode(casterWidth, casterHeight), "ray casting");
     sf::Clock clock;
     clock.restart();
     while ( window3D.isOpen()) {
         sf::Time deltaT = clock.getElapsedTime();
-        //std::cout << deltaT.asSeconds() << std::endl;
+        std::cout << 1 / deltaT.asSeconds() << std::endl;
         clock.restart();
         sf::Event e;
         while (window3D.pollEvent(e)) {
@@ -37,21 +39,24 @@ int main() {
         floor.move(0, casterHeight/2);
         floor.setFillColor(sf::Color(56, 68, 82));
         window3D.draw(floor);
+
+        std::vector<sf::Texture> texture[8];
+
         for(int x = 0; x < casterWidth; x++){
             //calculate ray position and direction
-            double cameraX = 2 * x / (double)casterWidth - 1; //x-coordinate in camera space
+            double cameraX = 2 * x / (double)casterWidth - 1; //-1 for left pixel, 1 for right pixel
             double rayDirX = player->getdirX() + player->getplaneX() * cameraX;
             double rayDirY = player->getdirY() + player->getplaneY() * cameraX;
             //which box of the map we're in
             int mapX = int(player->getPosX());
             int mapY = int(player->getPosY());
+            // length of ray from one x or y-side to next x or y-side
+            // "1" is for the length of vector [rayDirX, rayDirY].
+            double deltaDistX = (rayDirY == 0) ? 0 : ((rayDirX == 0) ? 1 : std::abs(1 / rayDirX)); 
+            double deltaDistY = (rayDirX == 0) ? 0 : ((rayDirY == 0) ? 1 : std::abs(1 / rayDirY));
             //length of ray from current position to next x or y-side
             double sideDistX;
             double sideDistY;
-            //length of ray from one x or y-side to next x or y-side
-            double deltaDistX = std::abs(1 / rayDirX);
-            double deltaDistY = std::abs(1 / rayDirY);
-            double perpWallDist;
             //what direction to step in x or y-direction (either +1 or -1)
             int stepX;
             int stepY;
@@ -91,6 +96,7 @@ int main() {
                 if(map_vect[mapX][mapY] > 0) hit = 1;
             }
             //Calculate distance projected on camera direction (Euclidean distance will give fisheye effect!)
+            double perpWallDist;
             if(side == 0) perpWallDist = (mapX - player->getPosX() + (1 - stepX) / 2) / rayDirX;
             else          perpWallDist = (mapY - player->getPosY() + (1 - stepY) / 2) / rayDirY;
             //Calculate height of line to draw on screen
