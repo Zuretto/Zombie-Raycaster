@@ -8,6 +8,7 @@ class Player{
 private:
     Map *worldMap;
     double healthPoints;
+    double radius;
     double moveSpeed;
     double rotationSpeed;
     double posX;

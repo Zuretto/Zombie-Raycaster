@@ -1,6 +1,7 @@
 #include "Player.hpp"
 Player::Player(double xpos, double ypos, double xdir, double ydir, double xplane, double yplane, Map *worldMap){
     healthPoints = 100;
+    radius = 0.25;
     posX = xpos;
     posY = ypos;
     moveSpeed = 10;
@@ -34,15 +35,19 @@ Player::~Player(){
 }
 void Player::forward(sf::Time deltaT){
     double discreteTime = deltaT.asSeconds();
+    double xRadius = -radius * ((dirX < 0) - (0 < dirX));
+    double yRadius = -radius * ((dirY < 0) - (0 < dirY));
     std::vector <std::vector <int>> map_vect = worldMap->getMapVector();
-    if(map_vect[int(posX + dirX * moveSpeed * discreteTime)][int(posY)] == false) posX += dirX * moveSpeed * discreteTime;
-    if(map_vect[int(posX)][int(posY + dirY * moveSpeed * discreteTime)] == false) posY += dirY * moveSpeed * discreteTime;
+    if(map_vect[int(posX + xRadius + dirX * moveSpeed * discreteTime)][int(posY + yRadius)] == false) posX += dirX * moveSpeed * discreteTime;
+    if(map_vect[int(posX + xRadius)][int(posY + yRadius + dirY * moveSpeed * discreteTime)] == false) posY += dirY * moveSpeed * discreteTime;
 }
 void Player::backward(sf::Time deltaT){
     double discreteTime = deltaT.asSeconds();
     std::vector <std::vector <int>> map_vect = worldMap->getMapVector();
-    if(map_vect[int(posX - dirX * moveSpeed * discreteTime)][int(posY)] == false) posX -= dirX * moveSpeed * discreteTime;
-    if(map_vect[int(posX)][int(posY - dirY * moveSpeed * discreteTime)] == false) posY -= dirY * moveSpeed * discreteTime;
+    double xRadius = radius * ((dirX < 0) - (0 < dirX));
+    double yRadius = radius * ((dirY < 0) - (0 < dirY));
+    if(map_vect[int(posX + xRadius - dirX * moveSpeed * discreteTime)][int(posY + yRadius)] == false) posX -= dirX * moveSpeed * discreteTime;
+    if(map_vect[int(posX + xRadius)][int(posY + yRadius - dirY * moveSpeed * discreteTime)] == false) posY -= dirY * moveSpeed * discreteTime;
 }
 void Player::rotateRight(sf::Time deltaT){
       //both camera direction and camera plane must be rotated
