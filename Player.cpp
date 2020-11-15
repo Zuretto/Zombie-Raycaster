@@ -1,9 +1,10 @@
 #include "Player.hpp"
 Player::Player(double xpos, double ypos, double xdir, double ydir, double xplane, double yplane, Map *worldMap){
+    healthPoints = 100;
     posX = xpos;
     posY = ypos;
-    moveSpeed = 0.005;
-    rotationSpeed = 0.001;
+    moveSpeed = 10;
+    rotationSpeed = 10;
     dirX = xdir;
     dirY = ydir;
     planeX = xplane;
@@ -34,30 +35,32 @@ Player::~Player(){
 void Player::forward(sf::Time deltaT){
     double discreteTime = deltaT.asSeconds();
     std::vector <std::vector <int>> map_vect = worldMap->getMapVector();
-    if(map_vect[int(posX + dirX * moveSpeed)][int(posY)] == false) posX += dirX * moveSpeed;
-    if(map_vect[int(posX)][int(posY + dirY * moveSpeed)] == false) posY += dirY * moveSpeed;
+    if(map_vect[int(posX + dirX * moveSpeed * discreteTime)][int(posY)] == false) posX += dirX * moveSpeed * discreteTime;
+    if(map_vect[int(posX)][int(posY + dirY * moveSpeed * discreteTime)] == false) posY += dirY * moveSpeed * discreteTime;
 }
 void Player::backward(sf::Time deltaT){
     double discreteTime = deltaT.asSeconds();
     std::vector <std::vector <int>> map_vect = worldMap->getMapVector();
-    if(map_vect[int(posX - dirX * moveSpeed)][int(posY)] == false) posX -= dirX * moveSpeed;
-    if(map_vect[int(posX)][int(posY - dirY * moveSpeed)] == false) posY -= dirY * moveSpeed;
+    if(map_vect[int(posX - dirX * moveSpeed * discreteTime)][int(posY)] == false) posX -= dirX * moveSpeed * discreteTime;
+    if(map_vect[int(posX)][int(posY - dirY * moveSpeed * discreteTime)] == false) posY -= dirY * moveSpeed * discreteTime;
 }
 void Player::rotateRight(sf::Time deltaT){
       //both camera direction and camera plane must be rotated
+      double rSpeed = rotationSpeed * deltaT.asSeconds();
       double oldDirX = dirX;
-      dirX = dirX * cos(-rotationSpeed) - dirY * sin(-rotationSpeed);
-      dirY = oldDirX * sin(-rotationSpeed) + dirY * cos(-rotationSpeed);
+      dirX = dirX * cos(-rSpeed) - dirY * sin(-rSpeed);
+      dirY = oldDirX * sin(-rSpeed) + dirY * cos(-rSpeed);
       double oldPlaneX = planeX;
-      planeX = planeX * cos(-rotationSpeed) - planeY * sin(-rotationSpeed);
-      planeY = oldPlaneX * sin(-rotationSpeed) + planeY * cos(-rotationSpeed);
+      planeX = planeX * cos(-rSpeed) - planeY * sin(-rSpeed);
+      planeY = oldPlaneX * sin(-rSpeed) + planeY * cos(-rSpeed);
     }
 void Player::rotateLeft(sf::Time deltaT){
       //both camera direction and camera plane must be rotated
+      double rSpeed = rotationSpeed * deltaT.asSeconds();
       double oldDirX = dirX;
-      dirX = dirX * cos(rotationSpeed) - dirY * sin(rotationSpeed);
-      dirY = oldDirX * sin(rotationSpeed) + dirY * cos(rotationSpeed);
+      dirX = dirX * cos(rSpeed) - dirY * sin(rSpeed);
+      dirY = oldDirX * sin(rSpeed) + dirY * cos(rSpeed);
       double oldPlaneX = planeX;
-      planeX = planeX * cos(rotationSpeed) - planeY * sin(rotationSpeed);
-      planeY = oldPlaneX * sin(rotationSpeed) + planeY * cos(rotationSpeed);
+      planeX = planeX * cos(rSpeed) - planeY * sin(rSpeed);
+      planeY = oldPlaneX * sin(rSpeed) + planeY * cos(rSpeed);
 }

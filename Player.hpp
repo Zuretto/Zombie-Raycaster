@@ -1,4 +1,5 @@
 #pragma once
+#include "definitions.hpp"
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <math.h>
@@ -6,7 +7,7 @@
 class Player{
 private:
     Map *worldMap;
-    
+    double healthPoints;
     double moveSpeed;
     double rotationSpeed;
     double posX;
