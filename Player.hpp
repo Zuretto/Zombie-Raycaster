@@ -26,6 +26,7 @@ public:
     double getdirY();
     double getplaneX();
     double getplaneY();
+    double getRadius();
     void forward(sf::Time deltaT);
     void backward(sf::Time deltaT);
     void rotateRight(sf::Time deltaT);

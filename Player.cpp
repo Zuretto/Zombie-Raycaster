@@ -30,6 +30,9 @@ double Player::getplaneX(){
 double Player::getplaneY(){
     return planeY;
 }
+double Player::getRadius(){
+    return radius;
+}
 Player::~Player(){
     std::cout<<"aaaaaaaaa";
 }
