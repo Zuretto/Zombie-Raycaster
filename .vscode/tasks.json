@@ -10,6 +10,7 @@
                 "Player.cpp",
                 "Map.cpp",
                 "Game.cpp",
+                "Entity.cpp",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 "-IC:\\SFML\\include",
