@@ -1,6 +1,8 @@
 #pragma once
 #include "definitions.hpp"
 #include "SFML/Graphics.hpp"
+enum entity_enum {ENTITY, BARREL, TABLE, LAMP, PILLAR, ENTITY_TYPES_NUMBER};
+
 class Entity{
 protected:
     double posX;
@@ -9,14 +11,22 @@ protected:
 public:
     Entity();
     virtual ~Entity();
+    virtual int getType();
+    double getPosX() const;
+    double getPosY() const;
+    double getRadius();
 };
 
 class Barrel : public Entity{
-//private:
 public:
     Barrel(double posX, double posY);
     ~Barrel();
-    double getPosX();
-    double getPosY();
-    double getRadius();
+    int getType() override;
+};
+
+class Pillar : public Entity{
+public:
+    Pillar(double posX, double posY);
+    ~Pillar();
+    int getType() override;
 };
