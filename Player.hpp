@@ -4,9 +4,12 @@
 #include <iostream>
 #include <math.h>
 #include "Map.hpp"
+#include "Weapon.hpp"
 class Player{
 private:
-    Map *worldMap;
+    //Map *worldMap;
+    Weapon *weapons[GUN_TYPES_NUMBER];
+    int drawnGun;
     double healthPoints;
     double radius;
     double moveSpeed;
@@ -19,7 +22,7 @@ private:
     double planeY; //FOV
     
 public:
-    Player(double xpos, double ypos, double xdir, double ydir, double xplane, double yplane, Map *mapp);
+    Player(double xpos, double ypos, double xdir, double ydir, double xplane, double yplane);
     double getPosX();
     double getPosY();
     double getdirX();
@@ -27,9 +30,10 @@ public:
     double getplaneX();
     double getplaneY();
     double getRadius();
-    void forward(sf::Time deltaT);
-    void backward(sf::Time deltaT);
-    void rotateRight(sf::Time deltaT);
-    void rotateLeft(sf::Time deltaT);
+    int getDrawnWeapon();
+    void forward(sf::Time deltaT, Map *worldMap);
+    void backward(sf::Time deltaT,Map *worldMap);
+    void rotateRight(sf::Time deltaT, Map *worldMap);
+    void rotateLeft(sf::Time deltaT, Map *worldMap);
     ~Player();
 };
