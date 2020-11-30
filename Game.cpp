@@ -1,5 +1,20 @@
 #include "Game.hpp"
-Game::Game(){
+Game::Game(Player* player){
+    spriteComp.structPlayer = player;
+    this->player = player;
+    worldMap = new Map("data/maps/test.map");
+
+    entities.push_back(std::shared_ptr<Entity> (new Barrel(11,13)));
+    entities.push_back(std::shared_ptr<Entity> (new Barrel(12,13)));
+    entities.push_back(std::shared_ptr<Entity> (new Pillar(3,3)));
+    entities.push_back(std::shared_ptr<Entity> (new Barrel(13,13)));
+
+    enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,10)));
+    enemies.push_back(std::shared_ptr<Enemy> (new Zombie(5,5)));
+
+
+
+
     sf::Image wallImages[8];
         wallImages[0].loadFromFile("data/pics/wooden plank.png");
         wallImages[1].loadFromFile("data/pics/chiseled stone brick.png");
@@ -13,14 +28,33 @@ Game::Game(){
         for (int j = 0; j < texWidth; j++)
             wallTexturesPx[i][j].loadFromImage(wallImages[i], sf::IntRect(j, 0, 1, texHeight));
     }
-    sf::Image barellImage;
-    barellImage.loadFromFile("data/pics/barrel.png");
-    barrelTexturePx.loadFromFile("data/pics/barrel.png");
-    //for(int j = 0; j < entityWidth; j++)
-    //    barrelTexturePx[j].loadFromImage(barellImage, sf::IntRect(j, 0, 1, entityHeight));
+
+    sf::Image entityImages[ENTITY_TYPES_NUMBER];
+        entityImages[ENTITY].loadFromFile("data/pics/blank.png");
+        entityImages[BARREL].loadFromFile("data/pics/barrel.png");
+        entityImages[TABLE].loadFromFile("data/pics/blank.png");
+        entityImages[LAMP].loadFromFile("data/pics/blank.png");
+        entityImages[PILLAR].loadFromFile("data/pics/pillar.png");
+    for (int i = 0; i < ENTITY_TYPES_NUMBER; i++)
+        for(int j = 0; j < entityWidth; j++)
+            entityTexturesPx[i][j].loadFromImage(entityImages[i], sf::IntRect(j, 0, 1, entityHeight));
+
+    sf::Image enemyImages[ENEMY_TYPES_NUMBER];
+        enemyImages[ENEMY].loadFromFile("data/pics/blank.png");
+        enemyImages[ZOMBIE].loadFromFile("data/pics/zombie.png");
+        enemyImages[SKELETON].loadFromFile("data/pics/skeleton.png");
+    for(int i = 0; i < ENEMY_TYPES_NUMBER; i++)
+        for(int j = 0; j < enemyWidth; j++)
+            enemyTexturesPx[i][j].loadFromImage(enemyImages[i], sf::IntRect(j,0,1,entityHeight));
+
+    weaponTextures[PISTOL][0].loadFromFile("data/pics/pistol.png");
+    weaponTextures[PISTOL][1].loadFromFile("data/pics/pistol_shot.png");
+    weaponState = 0;
+    weaponClock.restart();
+
 
 }
-void Game::drawScene(sf::RenderTarget &target, Player *player, Map *worldMap){
+void Game::drawScene(sf::RenderTarget &target){
     sf::RectangleShape sky(sf::Vector2f(casterWidth, casterHeight / 2));
     sky.setFillColor(sf::Color(108, 158, 222));
     target.draw(sky);
@@ -41,7 +75,6 @@ void Game::drawScene(sf::RenderTarget &target, Player *player, Map *worldMap){
         // "1" is for the length of vector [rayDirX, rayDirY].
         double deltaDistX = (rayDirY == 0) ? 0 : ((rayDirX == 0) ? 1 : std::abs(1 / rayDirX)); 
         double deltaDistY = (rayDirX == 0) ? 0 : ((rayDirY == 0) ? 1 : std::abs(1 / rayDirY));
-        
         //length of ray from current position to next x or y-side
         double sideDistX;
         double sideDistY;
@@ -87,69 +120,170 @@ void Game::drawScene(sf::RenderTarget &target, Player *player, Map *worldMap){
         double perpWallDist;
         if(side == 0) perpWallDist = (mapX - player->getPosX() + (1 - stepX) / 2) / rayDirX;
         else          perpWallDist = (mapY - player->getPosY() + (1 - stepY) / 2) / rayDirY;
+        //SET THE ZBUFFER FOR THE SPRITE CASTING
+        ZBuffer[x] = perpWallDist; //perpendicular distance is used
         //Calculate height of line to draw on screen
         int lineHeight = (int)(casterHeight / perpWallDist);
         //calculate lowest and highest pixel to fill in current stripe
         int drawStart = -lineHeight / 2 + casterHeight / 2;
-        //if (drawStart < 0) drawStart = 0;
-        int drawEnd = lineHeight / 2 + casterHeight / 2;
-        //if (drawEnd >= casterHeight) drawEnd = casterHeight - 1;
         //texturing calculations
-            // texture number
-        int texNum = map_vect[mapX][mapY] - 1; 
-        double wallX; //where exactly the wall was hit
+        int texNum = map_vect[mapX][mapY] - 1;          //texture number
+        double wallX;                                   //where exactly the wall was hit
         if (side == 0) wallX = player->getPosY() + perpWallDist * rayDirY;
         else           wallX = player->getPosX() + perpWallDist * rayDirX;
         wallX -= std::floor(wallX);
-            //x coordinate on the texture
-        int textureX = int(wallX * texWidth);
+        int textureX = int(wallX * texWidth);           //x coordinate on the texture
+        //Drawing
         sf::Sprite lineSprite(wallTexturesPx[texNum][textureX]);
-        lineSprite.setScale(1, (double)(drawEnd - drawStart) / texHeight); //stretches sprite so that it's height = drawEnd - drawStart
+        lineSprite.setScale(1, (double)lineHeight/texHeight); //stretches line of pixels to the bottom
         lineSprite.move(x, drawStart);
         target.draw(lineSprite);
     }
 }
-void Game::drawEntities(sf::RenderTarget &target, Player *player, Map *worldMap, Entity *entity){
-    auto map_vect = worldMap->getMapVector();
-    Barrel *barrel = dynamic_cast<Barrel*>(entity);
-    bool drawn = 0;
-    for(int x = 0 - 2 * entityWidth; x < casterWidth / 4; x++){
-        //calculate ray position and direction
-        double cameraX = 2 * x * 4 / (double)casterWidth - 1; //-1 for left pixel, 1 for right pixel
-        double rayDirX = player->getdirX() + player->getplaneX() * cameraX;
-        double rayDirY = player->getdirY() + player->getplaneY() * cameraX;
-        //which box of the map we're in
-        double rayPosX = player->getPosX();
-        double rayPosY = player->getPosY();
-        // deltaX and deltaY of the ray - being added in a loop until hits wall or an entity.
-        // "1" is for the length of vector [rayDirX, rayDirY].
-        double rayStep = 0.05;
-        double rayStepX = rayDirX * rayStep;
-        double rayStepY = rayDirY * rayStep;
-        int wallHit = 0; //was there a wall hit?
-        int entityHit = 0;
-        while (wallHit == 0 && entityHit == 0){
-            //increase rayPosX and rayPosY until hit wall OR an entity OR an enemy
-            rayPosX += rayStepX;
-            rayPosY += rayStepY;
-            //Check if ray has hit a wall
-            if(map_vect[(int)rayPosX][(int)rayPosY] > 0) wallHit = 1;
-            //Check if ray has hit an entity
-            if(sqrt(pow(rayPosX - barrel->getPosX(), 2) + pow(rayPosY - barrel->getPosY(), 2)) < barrel->getRadius()) entityHit = 1;
-        }
-        //Calculate distance projected on camera direction (Euclidean distance will give fisheye effect!)
-        if (entityHit == 1 && drawn != 1){
-            double entityDistance = sqrt(pow(rayPosX - player->getPosX(), 2) + pow(rayPosY - player->getPosY(), 2));
-            //Calculate height of line to draw on screen
-            int lineHeight = (int)(casterHeight / entityDistance);
+void Game::drawWeapon(sf::RenderTarget &target){
+    sf::Sprite gunSprite(weaponTextures[player->getDrawnWeapon()][weaponState]);
+    double scaleX = (double)casterWidth*2/5/weaponWidth;
+    double scaleY = (double)casterHeight*2/5/weaponHeight;
+    gunSprite.setScale(scaleX, scaleY);
+    gunSprite.move(casterWidth/2 - scaleX * weaponWidth/2, casterHeight - scaleY * weaponHeight);
+    target.draw(gunSprite);
+}
+
+void Game::drawEntity(sf::RenderTarget &target, std::shared_ptr<Entity> &entity){
+    //translate sprite position to relative to camera
+            double spriteX = entity->getPosX() - player->getPosX();
+            double spriteY = entity->getPosY() - player->getPosY();;
+            //transform sprite with the inverse camera matrix
+            // [ planeX   dirX ] -1                                       [ dirY      -dirX ]
+            // [               ]       =  1/(planeX*dirY-dirX*planeY) *   [                 ]
+            // [ planeY   dirY ]                                          [ -planeY  planeX ]
+            double invDet = 1.0 / (player->getplaneX() * player->getdirY() - player->getdirX() * player->getplaneY()); //required for correct matrix multiplication
+            //this is actually the depth inside the screen, that what Z is   in 3D
+            double transformX = invDet * (player->getdirY() * spriteX - player->getdirX() * spriteY);
+            double transformY = invDet * (-player->getplaneY() * spriteX + player->getplaneX() * spriteY); 
+            int spriteScreenX = int((casterWidth / 2) * (1 + transformX / transformY));
+            //calculate height of the sprite on screen
+            int spriteHeight = abs(int(casterHeight / (transformY))); //using 'transformY' instead of the real distance prevents fisheye
             //calculate lowest and highest pixel to fill in current stripe
-            int drawStart = -lineHeight / 2 + casterHeight / 2;
-            int drawEnd = lineHeight / 2 + casterHeight / 2;
-            sf::Sprite lineSprite(barrelTexturePx);
-            lineSprite.setScale((double)(drawEnd - drawStart) / entityHeight, (double)(drawEnd - drawStart) / entityHeight); //stretches sprite so that it's height = drawEnd - drawStart
-            lineSprite.move(x * 4, drawStart);
+            int drawStartY = -spriteHeight / 2 + casterHeight / 2;
+            //if(drawStartY < 0) drawStartY = 0;
+            int drawEndY = spriteHeight / 2 + casterHeight / 2;
+            //if(drawEndY >= casterHeight) drawEndY = casterHeight - 1;
+            //calculate width of the sprite
+            int spriteWidth = abs(int (casterHeight / (transformY)));
+            int drawStartX = -spriteWidth / 2 + spriteScreenX;
+            if(drawStartX < 0) drawStartX = 0;
+            int drawEndX = spriteWidth / 2 + spriteScreenX;
+            if(drawEndX >= casterWidth) drawEndX = casterWidth - 1;
+            for(int stripe = drawStartX; stripe < drawEndX; stripe++){
+                int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * entityWidth / spriteWidth) / 256;
+                if(transformY > 0 && stripe > 0 && stripe < casterWidth && transformY < ZBuffer[stripe]){
+                    sf::Sprite lineSprite(entityTexturesPx[entity->getType()][texX]);
+                    lineSprite.setScale(1, (double)(drawEndY - drawStartY)/entityHeight); //stretches line of pixels to the bottom
+                    lineSprite.move(stripe, drawStartY);
+                    target.draw(lineSprite);
+                }
+            }
+}
+
+
+void Game::drawEnemy(sf::RenderTarget &target, std::shared_ptr<Enemy> &enemy){
+    //translate sprite position to relative to camera
+    double spriteX = enemy->getPosX() - player->getPosX();
+    double spriteY = enemy->getPosY() - player->getPosY();;
+    //transform sprite with the inverse camera matrix
+    // [ planeX   dirX ] -1                                       [ dirY      -dirX ]
+    // [               ]       =  1/(planeX*dirY-dirX*planeY) *   [                 ]
+    // [ planeY   dirY ]                                          [ -planeY  planeX ]
+    double invDet = 1.0 / (player->getplaneX() * player->getdirY() - player->getdirX() * player->getplaneY()); //required for correct matrix multiplication
+    //this is actually the depth inside the screen, that what Z is   in 3D
+    double transformX = invDet * (player->getdirY() * spriteX - player->getdirX() * spriteY);
+    double transformY = invDet * (-player->getplaneY() * spriteX + player->getplaneX() * spriteY); 
+    int spriteScreenX = int((casterWidth / 2) * (1 + transformX / transformY));
+    //calculate height of the sprite on screen
+    int spriteHeight = abs(int(casterHeight / (transformY))); //using 'transformY' instead of the real distance prevents fisheye
+    //calculate lowest and highest pixel to fill in current stripe
+    int drawStartY = -spriteHeight / 2 + casterHeight / 2;
+    //if(drawStartY < 0) drawStartY = 0;
+    int drawEndY = spriteHeight / 2 + casterHeight / 2;
+    //if(drawEndY >= casterHeight) drawEndY = casterHeight - 1;
+    //calculate width of the sprite
+    int spriteWidth = abs(int (casterHeight / (transformY)));
+    int drawStartX = -spriteWidth / 2 + spriteScreenX;
+    if(drawStartX < 0) drawStartX = 0;
+    int drawEndX = spriteWidth / 2 + spriteScreenX;
+    if(drawEndX >= casterWidth) drawEndX = casterWidth - 1;
+    for(int stripe = drawStartX; stripe < drawEndX; stripe++){
+        int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * enemyWidth / spriteWidth) / 256;
+        if(transformY > 0 && stripe > 0 && stripe < casterWidth && transformY < ZBuffer[stripe]){
+            sf::Sprite lineSprite(enemyTexturesPx[enemy->getType()][texX]);
+            lineSprite.setScale(1, (double)(drawEndY - drawStartY)/enemyHeight); //stretches line of pixels to the bottom
+            lineSprite.move(stripe, drawStartY);
             target.draw(lineSprite);
-            drawn = 1;
         }
+    }
+}
+
+
+void Game::drawSprites(sf::RenderTarget &target){
+    //sorting the entities & enemies
+    std::sort(entities.begin(), entities.end(), spriteComp);
+    std::sort(enemies.begin(), enemies.end(), spriteComp);
+    int i_entity = 0;
+    int i_enemy = 0;
+    for(; i_entity < entities.size() || i_enemy < enemies.size();){
+        if(i_enemy >= enemies.size()){
+            drawEntity(target, entities[i_entity]);
+            i_entity++;
+        }
+        else if (i_entity >= entities.size()){
+            drawEnemy(target, enemies[i_enemy]);
+            i_enemy++;
+        }
+        else if (pow(entities[i_entity]->getPosX() - player->getPosX(), 2) + pow(entities[i_entity]->getPosY() - player->getPosY(), 2) 
+            >=   pow(enemies[i_enemy]->getPosX() - player->getPosX(), 2) + pow(enemies[i_enemy]->getPosY() - player->getPosY(), 2)){
+            drawEntity(target, entities[i_entity]);
+            i_entity++;
+        }
+        else{
+            drawEnemy(target, enemies[i_enemy]);
+            i_enemy++;
+        }
+    }
+}
+
+
+void Game::setWeaponState(int state){
+    weaponState = state;
+}
+int Game::getWeaponState(){
+    return weaponState;
+}
+
+void Game::onUpdate(sf::Time deltaT){
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)){
+            player->forward(deltaT, worldMap);
+        }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)){
+            player->backward(deltaT, worldMap);
+        }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)){
+            player->rotateRight(deltaT, worldMap);
+        }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)){
+            player->rotateLeft(deltaT, worldMap);
+        }
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Left)){
+        if (weaponClock.getElapsedTime().asSeconds() > 0.25){
+                setWeaponState(1);
+                weaponClock.restart();
+            }
+        }
+    if(weaponState==1 && weaponClock.getElapsedTime().asSeconds() > 0.125){
+            setWeaponState(0);
+        }
+    for(int i = 0; i < enemies.size(); i++){
+        //if (enemies[i]->getType() == SKELETON)
+            enemies[i]->moveTowardsPlayer(deltaT, player);
     }
 }
