@@ -11,3 +11,13 @@
 #define enemyHeight 64
 #define weaponWidth 128
 #define weaponHeight 128
+
+enum gun_enum {WEAPON, FIST, PISTOL, SHOTGUN, GUN_TYPES_NUMBER};
+
+enum gun_states {DRAWN, SHOOT, WEAPON_STATES_NUMBER};
+
+enum enemy_states {ALIVE, DIED1, DIED2, DEAD, ENEMY_STATES_NUMBER};
+
+enum enemy_num {ENEMY, ZOMBIE, SKELETON, ENEMY_TYPES_NUMBER};
+
+enum entity_enum {ENTITY, BARREL, TABLE, LAMP, PILLAR, ENTITY_TYPES_NUMBER};
