@@ -1,16 +1,19 @@
 #pragma once
 #include <iostream>
+#include <vector>
 #include "definitions.hpp"
 #include "Player.hpp"
-enum enemy_num {ENEMY, ZOMBIE, SKELETON, ENEMY_TYPES_NUMBER};
 
+class Weapon;
+class Player;
 class Enemy{
 protected:
-    int healthPoints;
+    int    healthPoints;
     double moveSpeed;
     double posX;
     double posY;
     double radius;
+    sf::Clock deadClock;
 public:
     Enemy();
     virtual ~Enemy();
@@ -18,7 +21,9 @@ public:
     double getPosX() const;
     double getPosY() const;
     double getRadius();
-
+    int getHp();
+    int calculateState();
+    void lowerHp(unsigned int damage);
     void moveTowardsPlayer(sf::Time deltaT, Player *player);
 };
 
