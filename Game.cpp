@@ -2,7 +2,8 @@
 Game::Game(Player* player){
     spriteComp.structPlayer = player;
     this->player = player;
-    worldMap = new Map("data/maps/test.map");
+    worldMap = new Map("data/maps/square.map");
+    resManager = new Resource_Manager;
 
     entities.push_back(std::shared_ptr<Entity> (new Barrel(11,13)));
     entities.push_back(std::shared_ptr<Entity> (new Barrel(12,13)));
@@ -12,43 +13,6 @@ Game::Game(Player* player){
     enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,10)));
     enemies.push_back(std::shared_ptr<Enemy> (new Zombie(5,5)));
 
-
-
-
-    sf::Image wallImages[8];
-        wallImages[0].loadFromFile("data/pics/wooden plank.png");
-        wallImages[1].loadFromFile("data/pics/chiseled stone brick.png");
-        wallImages[2].loadFromFile("data/pics/cobblestone.png");
-        wallImages[3].loadFromFile("data/pics/cracked stone brick.png"); 
-        wallImages[4].loadFromFile("data/pics/nether brick.png");
-        wallImages[5].loadFromFile("data/pics/stone brick.png");
-        wallImages[6].loadFromFile("data/pics/stone.png");
-        wallImages[7].loadFromFile("data/pics/andesite.png");
-    for (int i = 0; i < 8; i++){
-        for (int j = 0; j < texWidth; j++)
-            wallTexturesPx[i][j].loadFromImage(wallImages[i], sf::IntRect(j, 0, 1, texHeight));
-    }
-
-    sf::Image entityImages[ENTITY_TYPES_NUMBER];
-        entityImages[ENTITY].loadFromFile("data/pics/blank.png");
-        entityImages[BARREL].loadFromFile("data/pics/barrel.png");
-        entityImages[TABLE].loadFromFile("data/pics/blank.png");
-        entityImages[LAMP].loadFromFile("data/pics/blank.png");
-        entityImages[PILLAR].loadFromFile("data/pics/pillar.png");
-    for (int i = 0; i < ENTITY_TYPES_NUMBER; i++)
-        for(int j = 0; j < entityWidth; j++)
-            entityTexturesPx[i][j].loadFromImage(entityImages[i], sf::IntRect(j, 0, 1, entityHeight));
-
-    sf::Image enemyImages[ENEMY_TYPES_NUMBER];
-        enemyImages[ENEMY].loadFromFile("data/pics/blank.png");
-        enemyImages[ZOMBIE].loadFromFile("data/pics/zombie.png");
-        enemyImages[SKELETON].loadFromFile("data/pics/skeleton.png");
-    for(int i = 0; i < ENEMY_TYPES_NUMBER; i++)
-        for(int j = 0; j < enemyWidth; j++)
-            enemyTexturesPx[i][j].loadFromImage(enemyImages[i], sf::IntRect(j,0,1,entityHeight));
-
-    weaponTextures[PISTOL][0].loadFromFile("data/pics/pistol.png");
-    weaponTextures[PISTOL][1].loadFromFile("data/pics/pistol_shot.png");
     weaponState = 0;
     weaponClock.restart();
 
@@ -104,14 +68,14 @@ void Game::drawScene(sf::RenderTarget &target){
         while (hit == 0){
             //jump to next map square, OR in x-direction, OR in y-direction
             if(sideDistX < sideDistY){
-            sideDistX += deltaDistX;
-            mapX += stepX;
-            side = 0;
+                sideDistX += deltaDistX;
+                mapX += stepX;
+                side = 0;
             }
             else{
-            sideDistY += deltaDistY;
-            mapY += stepY;
-            side = 1;
+                sideDistY += deltaDistY;
+                mapY += stepY;
+                side = 1;
             }
             //Check if ray has hit a wall
             if(map_vect[mapX][mapY] > 0) hit = 1;
@@ -134,14 +98,15 @@ void Game::drawScene(sf::RenderTarget &target){
         wallX -= std::floor(wallX);
         int textureX = int(wallX * texWidth);           //x coordinate on the texture
         //Drawing
-        sf::Sprite lineSprite(wallTexturesPx[texNum][textureX]);
+        sf::Sprite lineSprite(resManager->wallTexturesPx[texNum][textureX]);
         lineSprite.setScale(1, (double)lineHeight/texHeight); //stretches line of pixels to the bottom
         lineSprite.move(x, drawStart);
         target.draw(lineSprite);
     }
 }
+
 void Game::drawWeapon(sf::RenderTarget &target){
-    sf::Sprite gunSprite(weaponTextures[player->getDrawnWeapon()][weaponState]);
+    sf::Sprite gunSprite(resManager->weaponTextures[player->getDrawnWeapon()][weaponState]);
     double scaleX = (double)casterWidth*2/5/weaponWidth;
     double scaleY = (double)casterHeight*2/5/weaponHeight;
     gunSprite.setScale(scaleX, scaleY);
@@ -178,7 +143,9 @@ void Game::drawEntity(sf::RenderTarget &target, std::shared_ptr<Entity> &entity)
             for(int stripe = drawStartX; stripe < drawEndX; stripe++){
                 int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * entityWidth / spriteWidth) / 256;
                 if(transformY > 0 && stripe > 0 && stripe < casterWidth && transformY < ZBuffer[stripe]){
-                    sf::Sprite lineSprite(entityTexturesPx[entity->getType()][texX]);
+                    //sf::Sprite lineSprite(entityTexturesPx[entity->getType()][texX]);
+                    //sf::Texture entityTexture = *resManager->getEntityTexture(entity->getType(), texX);
+                    sf::Sprite lineSprite(resManager->entityTexturesPx[entity->getType()][texX]);
                     lineSprite.setScale(1, (double)(drawEndY - drawStartY)/entityHeight); //stretches line of pixels to the bottom
                     lineSprite.move(stripe, drawStartY);
                     target.draw(lineSprite);
@@ -216,7 +183,9 @@ void Game::drawEnemy(sf::RenderTarget &target, std::shared_ptr<Enemy> &enemy){
     for(int stripe = drawStartX; stripe < drawEndX; stripe++){
         int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * enemyWidth / spriteWidth) / 256;
         if(transformY > 0 && stripe > 0 && stripe < casterWidth && transformY < ZBuffer[stripe]){
-            sf::Sprite lineSprite(enemyTexturesPx[enemy->getType()][texX]);
+            sf::Sprite lineSprite(resManager->enemyTexturesPx[enemy->getType()][enemy->calculateState()][texX]);
+            //if (enemy->getHp() > 0) lineSprite = sf::Sprite(enemyTexturesPx[enemy->getType()][texX][ALIVE]);
+            //else lineSprite = sf::Sprite(enemyTexturesPx[enemy->getType()][texX][DEAD]);
             lineSprite.setScale(1, (double)(drawEndY - drawStartY)/enemyHeight); //stretches line of pixels to the bottom
             lineSprite.move(stripe, drawStartY);
             target.draw(lineSprite);
@@ -275,15 +244,15 @@ void Game::onUpdate(sf::Time deltaT){
         }
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left)){
         if (weaponClock.getElapsedTime().asSeconds() > 0.25){
-                setWeaponState(1);
-                weaponClock.restart();
-            }
+            setWeaponState(1);
+            player->performShoot(worldMap, enemies);
+            weaponClock.restart();
         }
+    }
     if(weaponState==1 && weaponClock.getElapsedTime().asSeconds() > 0.125){
             setWeaponState(0);
-        }
+    }
     for(int i = 0; i < enemies.size(); i++){
-        //if (enemies[i]->getType() == SKELETON)
-            enemies[i]->moveTowardsPlayer(deltaT, player);
+        enemies[i]->moveTowardsPlayer(deltaT, player);
     }
 }
