@@ -1,9 +1,9 @@
 #include "Player.hpp"
-Player::Player(double xpos, double ypos, double xdir, double ydir, double xplane, double yplane){
+Player::Player(double xpos, double ypos, double xdir, double ydir, double viewAngle){
     for(int i; i < GUN_TYPES_NUMBER; i++){
-        weapons[i] = new Weapon();
+        weapons[i] = std::shared_ptr<Weapon>(new Weapon());
     }
-    weapons[PISTOL] = new Pistol();
+    weapons[PISTOL] = std::shared_ptr<Pistol>(new Pistol());
     drawnGun = PISTOL;
     healthPoints = 100;
     radius = 0.25;
@@ -13,8 +13,8 @@ Player::Player(double xpos, double ypos, double xdir, double ydir, double xplane
     rotationSpeed = 10;
     dirX = xdir;
     dirY = ydir;
-    planeX = xplane;
-    planeY = yplane;
+    planeX = dirX * cos(-viewAngle) - dirY * sin(-viewAngle);
+    planeY = dirX * sin(-viewAngle) + dirY * cos(-viewAngle);
     
 }
 double Player::getPosX(){
@@ -79,4 +79,7 @@ void Player::rotateLeft(sf::Time deltaT, Map *worldMap){
     double oldPlaneX = planeX;
     planeX = planeX * cos(rSpeed) - planeY * sin(rSpeed);
     planeY = oldPlaneX * sin(rSpeed) + planeY * cos(rSpeed);
+}
+void Player::performShoot(Map *worldMap, std::vector <std::shared_ptr<Enemy>> &enemies){
+    weapons[drawnGun]->performShoot(this, worldMap, enemies);
 }

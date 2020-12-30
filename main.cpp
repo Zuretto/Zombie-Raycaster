@@ -17,17 +17,15 @@
 
 int main(){
 
-    Player *player = new Player(11, 11, -1, 0, 0, 1);
+    Player *player = new Player(11, 11, -1, 0, M_PI/2);
     Game game(player);
     sf::RenderWindow window3D(sf::VideoMode(casterWidth, casterHeight), "ray casting");
     sf::Clock fpsClock;         fpsClock.restart();
-    sf::Clock gunClock;         gunClock.restart();
-
 
     while (window3D.isOpen()){
         sf::Time deltaT = fpsClock.getElapsedTime();
         fpsClock.restart();
-        //std::cout << 1 / deltaT.asSeconds() << std::endl;
+        std::cout << 1 / deltaT.asSeconds() << std::endl;
         sf::Event e;
         while (window3D.pollEvent(e)){
             switch (e.type) {
@@ -38,15 +36,12 @@ int main(){
                 break;
             }
         }
-        
         window3D.clear();
         game.drawScene(window3D);
         game.drawSprites(window3D);
         game.drawWeapon(window3D);
         window3D.display();
-
         game.onUpdate(deltaT);
-        
     }
     return 0;
 }

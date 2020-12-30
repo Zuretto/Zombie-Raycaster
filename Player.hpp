@@ -1,14 +1,18 @@
 #pragma once
 #include "definitions.hpp"
+#include "Weapon.hpp"
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <math.h>
+#include <memory>
 #include "Map.hpp"
-#include "Weapon.hpp"
+#include "Enemy.hpp"
+class Weapon;
+class Enemy;
 class Player{
 private:
     //Map *worldMap;
-    Weapon *weapons[GUN_TYPES_NUMBER];
+    std::shared_ptr<Weapon> weapons[GUN_TYPES_NUMBER];
     int drawnGun;
     double healthPoints;
     double radius;
@@ -22,18 +26,19 @@ private:
     double planeY; //FOV
     
 public:
-    Player(double xpos, double ypos, double xdir, double ydir, double xplane, double yplane);
-    double getPosX();
+    Player(double xpos, double ypos, double xdir, double ydir, double viewAngle);
+    double getPosX();   
     double getPosY();
     double getdirX();
     double getdirY();
     double getplaneX();
     double getplaneY();
     double getRadius();
-    int getDrawnWeapon();
-    void forward(sf::Time deltaT, Map *worldMap);
-    void backward(sf::Time deltaT,Map *worldMap);
-    void rotateRight(sf::Time deltaT, Map *worldMap);
-    void rotateLeft(sf::Time deltaT, Map *worldMap);
+    int    getDrawnWeapon();
+    void   forward(sf::Time deltaT, Map *worldMap);
+    void   backward(sf::Time deltaT,Map *worldMap);
+    void   rotateRight(sf::Time deltaT, Map *worldMap);
+    void   rotateLeft(sf::Time deltaT, Map *worldMap);
+    void   performShoot(Map *worldMap, std::vector <std::shared_ptr<Enemy>> &enemies);
     ~Player();
 };
