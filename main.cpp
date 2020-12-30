@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <iostream>
+#include <experimental/optional>
 #include <math.h>
 #include <string>
 #include "definitions.hpp"
@@ -11,12 +12,13 @@
 #include "Weapon.hpp"
 #include "Game.hpp"
 #include "Entity.hpp"
+#include "Enemy.hpp"
+#include "Map.hpp"
 
 int main(){
 
     Player *player = new Player(11, 11, -1, 0, 0, 1);
     Game game(player);
-    
     sf::RenderWindow window3D(sf::VideoMode(casterWidth, casterHeight), "ray casting");
     sf::Clock fpsClock;         fpsClock.restart();
     sf::Clock gunClock;         gunClock.restart();
@@ -51,6 +53,6 @@ int main(){
 
 /*
     to-do list:
+    enemies attacks
     guns
-    enemies
 */
