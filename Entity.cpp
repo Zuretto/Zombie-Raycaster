@@ -32,7 +32,8 @@ Pillar::Pillar(double xPos, double yPos){
     posY = yPos;
     radius = 0.5;
 }
-Pillar::~Pillar(){}
+Pillar::~Pillar(){
+}
 int Pillar::getType(){
     return PILLAR;
 }

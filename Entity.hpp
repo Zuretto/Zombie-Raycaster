@@ -1,7 +1,7 @@
 #pragma once
-#include "definitions.hpp"
 #include "SFML/Graphics.hpp"
-enum entity_enum {ENTITY, BARREL, TABLE, LAMP, PILLAR, ENTITY_TYPES_NUMBER};
+#include "definitions.hpp"
+
 
 class Entity{
 protected:
