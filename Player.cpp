@@ -1,10 +1,12 @@
 #include "Player.hpp"
 Player::Player(double xpos, double ypos, double xdir, double ydir, double viewAngle){
-    for(int i; i < GUN_TYPES_NUMBER; i++){
+    for(int i = 0; i < WEAPON_TYPES_NUMBER; i++){
         weapons[i] = std::shared_ptr<Weapon>(new Weapon());
     }
+    weapons[FIST] = std::shared_ptr<Fist>(new Fist());
     weapons[PISTOL] = std::shared_ptr<Pistol>(new Pistol());
-    drawnGun = PISTOL;
+    weapons[SHOTGUN] = std::shared_ptr<Shotgun>(new Shotgun());
+    drawnWeapon = PISTOL;
     healthPoints = 100;
     radius = 0.25;
     posX = xpos;
@@ -39,20 +41,48 @@ double Player::getRadius(){
     return radius;
 }
 int Player::getDrawnWeapon(){
-    return drawnGun;
+    return drawnWeapon;
 }
+double Player::getMoveSpeed(){
+    return moveSpeed;
+}
+void Player::increaseHp(double heal){
+    healthPoints += heal;
+    if (healthPoints > 100) healthPoints = 100;
+}
+void Player::decreaseHp(double damage){
+    healthPoints -= damage;
+}
+double Player::getCurrentHp(){
+    return healthPoints;
+}
+double Player::getMaxHp(){
+    return maxHealthPoints;
+}
+int Player::getDrawnWeaponAmmo(){
+    return weapons[drawnWeapon]->getAmmo();
+}
+void Player::increaseAmmo(int weapon_type, int amount){
+    weapons[weapon_type]->increaseAmmo(amount);
+}
+
 Player::~Player(){
     std::cout<<"aaaaaaaaa";
 }
-void Player::forward(sf::Time deltaT, Map *worldMap){
+int Player::getWeaponState(){
+    return weapons[drawnWeapon]->calculateState();
+}
+void Player::forward(sf::Time deltaT, Map *worldMap, std::vector <std::shared_ptr<Entity>> entities){
     double discreteTime = deltaT.asSeconds();
     double xRadius = -radius * ((dirX < 0) - (0 < dirX));
     double yRadius = -radius * ((dirY < 0) - (0 < dirY));
+    double futureX = posX + xRadius + dirX * moveSpeed * discreteTime;
+    double futureY = posY + yRadius + dirY * moveSpeed * discreteTime;
     std::vector <std::vector <int>> map_vect = worldMap->getMapVector();
-    if(map_vect[int(posX + xRadius + dirX * moveSpeed * discreteTime)][int(posY + yRadius)] == false) posX += dirX * moveSpeed * discreteTime;
-    if(map_vect[int(posX + xRadius)][int(posY + yRadius + dirY * moveSpeed * discreteTime)] == false) posY += dirY * moveSpeed * discreteTime;
+    if(map_vect[int(futureX)][int(posY + yRadius)] == false) posX += dirX * moveSpeed * discreteTime;
+    if(map_vect[int(posX + xRadius)][int(futureY)] == false) posY += dirY * moveSpeed * discreteTime;
 }
-void Player::backward(sf::Time deltaT, Map *worldMap){
+void Player::backward(sf::Time deltaT, Map *worldMap, std::vector <std::shared_ptr<Entity>> entities){
     double discreteTime = deltaT.asSeconds();
     std::vector <std::vector <int>> map_vect = worldMap->getMapVector();
     double xRadius = radius * ((dirX < 0) - (0 < dirX));
@@ -80,6 +110,14 @@ void Player::rotateLeft(sf::Time deltaT, Map *worldMap){
     planeX = planeX * cos(rSpeed) - planeY * sin(rSpeed);
     planeY = oldPlaneX * sin(rSpeed) + planeY * cos(rSpeed);
 }
+
 void Player::performShoot(Map *worldMap, std::vector <std::shared_ptr<Enemy>> &enemies){
-    weapons[drawnGun]->performShoot(this, worldMap, enemies);
+    weapons[drawnWeapon]->performShoot(this, worldMap, enemies);
 }
+
+void Player::handleWeaponSwap(int weaponToChange){
+    if(weapons[weaponToChange]->getType() != WEAPON){
+        drawnWeapon = weaponToChange;
+    }
+}
+

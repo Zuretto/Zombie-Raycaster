@@ -7,13 +7,15 @@
 #include <memory>
 #include "Map.hpp"
 #include "Enemy.hpp"
+#include "Entity.hpp"
+class Entity;
 class Weapon;
 class Enemy;
 class Player{
 private:
-    //Map *worldMap;
-    std::shared_ptr<Weapon> weapons[GUN_TYPES_NUMBER];
-    int drawnGun;
+    std::shared_ptr<Weapon> weapons[WEAPON_TYPES_NUMBER];
+    static constexpr double maxHealthPoints = 100;
+    int    drawnWeapon;
     double healthPoints;
     double radius;
     double moveSpeed;
@@ -34,11 +36,20 @@ public:
     double getplaneX();
     double getplaneY();
     double getRadius();
+    double getMoveSpeed();
     int    getDrawnWeapon();
-    void   forward(sf::Time deltaT, Map *worldMap);
-    void   backward(sf::Time deltaT,Map *worldMap);
+    int    getWeaponState();
+    int    getDrawnWeaponAmmo();
+    void   increaseAmmo(int weapon_type, int amount);
+    double getCurrentHp();
+    double getMaxHp();
+    void   increaseHp(double heal);
+    void   decreaseHp(double damage);
+    void   forward(sf::Time deltaT, Map *worldMap, std::vector <std::shared_ptr<Entity>> entities);
+    void   backward(sf::Time deltaT,Map *worldMap, std::vector <std::shared_ptr<Entity>> entities);
     void   rotateRight(sf::Time deltaT, Map *worldMap);
     void   rotateLeft(sf::Time deltaT, Map *worldMap);
     void   performShoot(Map *worldMap, std::vector <std::shared_ptr<Enemy>> &enemies);
+    void   handleWeaponSwap(int weaponToChange);
     ~Player();
 };
