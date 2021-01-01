@@ -17,17 +17,17 @@ Resource_Manager::Resource_Manager(){
     }
 
     sf::Image entityImages[ENTITY_TYPES_NUMBER];
-        entityImages[ENTITY].loadFromFile("data/pics/blank.png");
+        entityImages[ENTITY].loadFromFile("data/pics/blank_entity.png");
         entityImages[BARREL].loadFromFile("data/pics/barrel.png");
-        entityImages[TABLE].loadFromFile("data/pics/blank.png");
-        entityImages[LAMP].loadFromFile("data/pics/blank.png");
+        entityImages[AMMO_PISTOL].loadFromFile("data/pics/ammo_pistol.png");
+        entityImages[AMMO_SHOTGUN].loadFromFile("data/pics/ammo_shotgun.png");
         entityImages[PILLAR].loadFromFile("data/pics/pillar.png");
     for (int iType = 0; iType < ENTITY_TYPES_NUMBER; iType++)
         for(int jStripe = 0; jStripe < entityWidth; jStripe++)
             entityTexturesPx[iType][jStripe].loadFromImage(entityImages[iType], sf::IntRect(jStripe, 0, 1, entityHeight));
 
     sf::Image enemyImages[ENEMY_TYPES_NUMBER];
-        enemyImages[ENEMY].loadFromFile("data/pics/blank.png");
+        enemyImages[ENEMY].loadFromFile("data/pics/blank_enemy.png");
         enemyImages[ZOMBIE].loadFromFile("data/pics/zombie.png");
         enemyImages[SKELETON].loadFromFile("data/pics/skeleton.png");
     for(int type = 0; type < ENEMY_TYPES_NUMBER; type++){
@@ -37,9 +37,32 @@ Resource_Manager::Resource_Manager(){
             }
         }
     }
+    //WEAPON, FIST, PISTOL, SHOTGUN
+    sf::Image weaponImages[WEAPON_TYPES_NUMBER];
+        weaponImages[WEAPON].loadFromFile("data/pics/pistol.png");
+        weaponImages[FIST].loadFromFile("data/pics/fist.png");
+        weaponImages[PISTOL].loadFromFile("data/pics/pistol.png");
+        weaponImages[SHOTGUN].loadFromFile("data/pics/shotgun.png");
+    /*
+    weaponTextures[PISTOL][DRAWN].loadFromImage(weaponImages[PISTOL], sf::IntRect(0, 0, 128, 128));
+    weaponTextures[PISTOL][SHOT1].loadFromImage(weaponImages[PISTOL], sf::IntRect(128, 0, 128, 128));
+    weaponTextures[PISTOL][SHOT2].loadFromImage(weaponImages[PISTOL], sf::IntRect(256, 0, 128, 128));
+    weaponTextures[PISTOL][SHOT3].loadFromImage(weaponImages[PISTOL], sf::IntRect(384, 0, 128, 128));
+    */
+    for(int i = 0; i < WEAPON_TYPES_NUMBER; i++){
+        for(int j = 0; j < WEAPON_STATES_NUMBER; j++){
+            weaponTextures[i][j].loadFromImage(weaponImages[i], sf::IntRect(j * weaponWidth, 0, weaponWidth, weaponHeight));
+        }
+    }
 
-    weaponTextures[PISTOL][0].loadFromFile("data/pics/pistol.png");
-    weaponTextures[PISTOL][1].loadFromFile("data/pics/pistol_shot.png");
+    gameUIFont.loadFromFile("data/fonts/dum1.ttf");
+
+    //for(int iType = 0; iType < WEAPON_TYPES_NUMBER; iType++){
+    //    for(int jState = 0; jState < WEAPON_STATES_NUMBER; jState++){
+    //        std::cout << jState * weaponWidth << std::endl;
+    //        weaponTextures[iType][jState].loadFromImage(enemyImages[iType], sf::IntRect(jState * weaponWidth, 0, weaponWidth, weaponHeight));
+    //    }
+    //}
 }
 
 /*
