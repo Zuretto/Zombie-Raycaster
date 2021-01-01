@@ -16,8 +16,7 @@
 #include "Map.hpp"
 
 int main(){
-
-    Player *player = new Player(11, 11, -1, 0, M_PI/2);
+    Player *player = new Player(10, 15, 1, 0, M_PI/2);
     Game game(player);
     sf::RenderWindow window3D(sf::VideoMode(casterWidth, casterHeight), "ray casting");
     sf::Clock fpsClock;         fpsClock.restart();
@@ -25,7 +24,7 @@ int main(){
     while (window3D.isOpen()){
         sf::Time deltaT = fpsClock.getElapsedTime();
         fpsClock.restart();
-        std::cout << 1 / deltaT.asSeconds() << std::endl;
+        //std::cout << 1 / deltaT.asSeconds() << std::endl;
         sf::Event e;
         while (window3D.pollEvent(e)){
             switch (e.type) {
@@ -36,10 +35,11 @@ int main(){
                 break;
             }
         }
+
         window3D.clear();
         game.drawScene(window3D);
         game.drawSprites(window3D);
-        game.drawWeapon(window3D);
+        game.drawUI(window3D);
         window3D.display();
         game.onUpdate(deltaT);
     }
@@ -48,6 +48,7 @@ int main(){
 
 /*
     to-do list:
-    enemies attacks
-    guns
+    enemies attacks (and whole logic)
+    from-file objects loading
+    new (2) enemies type
 */
