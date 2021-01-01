@@ -25,6 +25,7 @@ Map::Map(std::string fileName){
         map_vector.push_back(temp_vector);
         if (fp.eof()) break;
     }
+    fp.close();
 }
 Map::~Map(){
     std::cout << "hej" << std::endl;
