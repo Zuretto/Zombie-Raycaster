@@ -37,19 +37,23 @@ private:
     std::vector <std::shared_ptr<Entity>> entities;
     std::vector <std::shared_ptr<Enemy>> enemies;
 
-    int weaponState;
-    sf::Clock weaponClock;
+    //sf::Clock weaponClock;
     double ZBuffer[casterWidth]; //buffer used to draw sprites, contains perpWallDists for each x
     
 public:
     Game(Player* player);
     void drawScene(sf::RenderTarget & target);
-    void drawWeapon(sf::RenderTarget &target);
     void drawEntity(sf::RenderTarget &target, std::shared_ptr<Entity> &entity);
     void drawEnemy(sf::RenderTarget &target, std::shared_ptr<Enemy> &enemy);
     void drawSprites(sf::RenderTarget &target);
+    void drawWeapon(sf::RenderTarget &target);
+    void drawHealth(sf::RenderTarget &target);
+    void drawAmmo(sf::RenderTarget &target);
+    void drawUI(sf::RenderTarget &target);
     void setWeaponState(int state);
     void onUpdate(sf::Time deltaT);
+    void handlePlayerEntitiesApproach();
+    void updateEntities(sf::Time deltaT);
     int getWeaponState();
 
 

@@ -9,15 +9,19 @@ Game::Game(Player* player){
     entities.push_back(std::shared_ptr<Entity> (new Barrel(12,13)));
     entities.push_back(std::shared_ptr<Entity> (new Pillar(3,3)));
     entities.push_back(std::shared_ptr<Entity> (new Barrel(13,13)));
-
+    entities.push_back(std::shared_ptr<Ammo_Pistol> (new Ammo_Pistol(4,4)));
+    entities.push_back(std::shared_ptr<Ammo_Shotgun> (new Ammo_Shotgun(5,5)));
+    
     enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,10)));
-    enemies.push_back(std::shared_ptr<Enemy> (new Zombie(5,5)));
-
-    weaponState = 0;
-    weaponClock.restart();
-
+    enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,9)));
+    enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,8)));
+    enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,7)));
+    enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,6)));
+    enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,5)));
+    enemies.push_back(std::shared_ptr<Enemy> (new Zombie(10,4)));
 
 }
+
 void Game::drawScene(sf::RenderTarget &target){
     sf::RectangleShape sky(sf::Vector2f(casterWidth, casterHeight / 2));
     sky.setFillColor(sf::Color(108, 158, 222));
@@ -105,15 +109,6 @@ void Game::drawScene(sf::RenderTarget &target){
     }
 }
 
-void Game::drawWeapon(sf::RenderTarget &target){
-    sf::Sprite gunSprite(resManager->weaponTextures[player->getDrawnWeapon()][weaponState]);
-    double scaleX = (double)casterWidth*2/5/weaponWidth;
-    double scaleY = (double)casterHeight*2/5/weaponHeight;
-    gunSprite.setScale(scaleX, scaleY);
-    gunSprite.move(casterWidth/2 - scaleX * weaponWidth/2, casterHeight - scaleY * weaponHeight);
-    target.draw(gunSprite);
-}
-
 void Game::drawEntity(sf::RenderTarget &target, std::shared_ptr<Entity> &entity){
     //translate sprite position to relative to camera
             double spriteX = entity->getPosX() - player->getPosX();
@@ -143,8 +138,6 @@ void Game::drawEntity(sf::RenderTarget &target, std::shared_ptr<Entity> &entity)
             for(int stripe = drawStartX; stripe < drawEndX; stripe++){
                 int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * entityWidth / spriteWidth) / 256;
                 if(transformY > 0 && stripe > 0 && stripe < casterWidth && transformY < ZBuffer[stripe]){
-                    //sf::Sprite lineSprite(entityTexturesPx[entity->getType()][texX]);
-                    //sf::Texture entityTexture = *resManager->getEntityTexture(entity->getType(), texX);
                     sf::Sprite lineSprite(resManager->entityTexturesPx[entity->getType()][texX]);
                     lineSprite.setScale(1, (double)(drawEndY - drawStartY)/entityHeight); //stretches line of pixels to the bottom
                     lineSprite.move(stripe, drawStartY);
@@ -152,7 +145,6 @@ void Game::drawEntity(sf::RenderTarget &target, std::shared_ptr<Entity> &entity)
                 }
             }
 }
-
 
 void Game::drawEnemy(sf::RenderTarget &target, std::shared_ptr<Enemy> &enemy){
     //translate sprite position to relative to camera
@@ -184,15 +176,12 @@ void Game::drawEnemy(sf::RenderTarget &target, std::shared_ptr<Enemy> &enemy){
         int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * enemyWidth / spriteWidth) / 256;
         if(transformY > 0 && stripe > 0 && stripe < casterWidth && transformY < ZBuffer[stripe]){
             sf::Sprite lineSprite(resManager->enemyTexturesPx[enemy->getType()][enemy->calculateState()][texX]);
-            //if (enemy->getHp() > 0) lineSprite = sf::Sprite(enemyTexturesPx[enemy->getType()][texX][ALIVE]);
-            //else lineSprite = sf::Sprite(enemyTexturesPx[enemy->getType()][texX][DEAD]);
             lineSprite.setScale(1, (double)(drawEndY - drawStartY)/enemyHeight); //stretches line of pixels to the bottom
             lineSprite.move(stripe, drawStartY);
             target.draw(lineSprite);
         }
     }
 }
-
 
 void Game::drawSprites(sf::RenderTarget &target){
     //sorting the entities & enemies
@@ -221,20 +210,74 @@ void Game::drawSprites(sf::RenderTarget &target){
     }
 }
 
-
-void Game::setWeaponState(int state){
-    weaponState = state;
+void Game::drawWeapon(sf::RenderTarget &target){
+    sf::Sprite gunSprite(resManager->weaponTextures[player->getDrawnWeapon()][player->getWeaponState()]);
+    double scaleX = (double)casterWidth*2/5/weaponWidth;
+    double scaleY = (double)casterHeight*2/5/weaponHeight;
+    gunSprite.setScale(scaleX, scaleY);
+    gunSprite.move(casterWidth/2 - scaleX * weaponWidth/2, casterHeight - scaleY * weaponHeight);
+    target.draw(gunSprite);
 }
-int Game::getWeaponState(){
-    return weaponState;
+
+void Game::drawHealth(sf::RenderTarget &target){
+    sf::Text healthText;
+    healthText.setFont(resManager->gameUIFont);
+    healthText.setString(std::to_string((int)player->getCurrentHp()));
+    healthText.setCharacterSize(casterHeight/5);
+    healthText.setFillColor(sf::Color::Red);
+    healthText.move(0, casterHeight - healthText.getCharacterSize());
+    target.draw(healthText);
 }
 
+void Game::drawAmmo(sf::RenderTarget &target){
+    sf::Text ammoText;
+    int weaponAmmo = player->getDrawnWeaponAmmo();
+    if(weaponAmmo >= 0){
+        ammoText.setFont(resManager->gameUIFont);
+        ammoText.setString(std::to_string(weaponAmmo));
+        ammoText.setCharacterSize(casterHeight/5);
+        ammoText.setFillColor(sf::Color::Yellow);
+        ammoText.move(0, casterHeight - ammoText.getCharacterSize() *2);
+        target.draw(ammoText);
+    }
+}
+
+void Game::drawUI(sf::RenderTarget &target){
+    drawWeapon(target);
+    drawHealth(target);
+    drawAmmo(target);
+}
+
+
+void Game::handlePlayerEntitiesApproach(){
+    for(auto i : entities){
+        i->onApproach(player);
+    }
+}
+
+
+void Game::updateEntities(sf::Time deltaT){
+    for(auto i : entities){
+        i->onUpdate(deltaT, worldMap);
+    }
+    bool deletedSth = 1;
+    while(deletedSth){
+        deletedSth = 0;
+        for(int i = 0; i < entities.size(); ++i){
+            if (entities[i]->canBeDeleted()){
+                entities.erase(entities.begin() + i);
+                deletedSth = 1;
+                break;
+            }
+        }
+    }
+}
 void Game::onUpdate(sf::Time deltaT){
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)){
-            player->forward(deltaT, worldMap);
+            player->forward(deltaT, worldMap, entities);
         }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)){
-            player->backward(deltaT, worldMap);
+            player->backward(deltaT, worldMap, entities);
         }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)){
             player->rotateRight(deltaT, worldMap);
@@ -242,17 +285,24 @@ void Game::onUpdate(sf::Time deltaT){
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)){
             player->rotateLeft(deltaT, worldMap);
         }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)){
+        player->handleWeaponSwap(FIST);
+    }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)){
+        player->handleWeaponSwap(PISTOL);
+    }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)){
+        player->handleWeaponSwap(SHOTGUN);
+    }
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left)){
-        if (weaponClock.getElapsedTime().asSeconds() > 0.25){
-            setWeaponState(1);
-            player->performShoot(worldMap, enemies);
-            weaponClock.restart();
-        }
+        player->performShoot(worldMap, enemies);
     }
-    if(weaponState==1 && weaponClock.getElapsedTime().asSeconds() > 0.125){
-            setWeaponState(0);
-    }
+
+
+
     for(int i = 0; i < enemies.size(); i++){
         enemies[i]->moveTowardsPlayer(deltaT, player);
     }
+    handlePlayerEntitiesApproach();
+    updateEntities(deltaT);
 }
