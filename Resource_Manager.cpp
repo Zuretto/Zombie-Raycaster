@@ -21,7 +21,9 @@ Resource_Manager::Resource_Manager(){
         entityImages[BARREL].loadFromFile("data/pics/barrel.png");
         entityImages[AMMO_PISTOL].loadFromFile("data/pics/ammo_pistol.png");
         entityImages[AMMO_SHOTGUN].loadFromFile("data/pics/ammo_shotgun.png");
+        entityImages[HAMBURGER].loadFromFile("data/pics/hamburger.png");
         entityImages[PILLAR].loadFromFile("data/pics/pillar.png");
+        entityImages[SODA].loadFromFile("data/pics/soda.png");
     for (int iType = 0; iType < ENTITY_TYPES_NUMBER; iType++)
         for(int jStripe = 0; jStripe < entityWidth; jStripe++)
             entityTexturesPx[iType][jStripe].loadFromImage(entityImages[iType], sf::IntRect(jStripe, 0, 1, entityHeight));
@@ -56,7 +58,7 @@ Resource_Manager::Resource_Manager(){
     }
 
     gameUIFont.loadFromFile("data/fonts/dum1.ttf");
-
+    
     //for(int iType = 0; iType < WEAPON_TYPES_NUMBER; iType++){
     //    for(int jState = 0; jState < WEAPON_STATES_NUMBER; jState++){
     //        std::cout << jState * weaponWidth << std::endl;

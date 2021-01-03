@@ -63,3 +63,24 @@ public:
     int getType() override;
     void onApproach(Player *player) override;
 };
+
+class Hamburger : public Entity{
+private:
+    static constexpr int healthRegen = 25;
+public:
+    Hamburger(double posX, double posY);
+    ~Hamburger();
+    int getType() override;
+    void onApproach(Player *player) override;
+};
+
+class Soda : public Entity{
+private:
+    static constexpr int healthRegen = 10;
+public:
+    Soda(double posX, double posY);
+    ~Soda();
+    int getType() override;
+    void onApproach(Player *player) override;
+};
+

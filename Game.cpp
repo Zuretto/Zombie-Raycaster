@@ -11,6 +11,8 @@ Game::Game(Player* player){
     entities.push_back(std::shared_ptr<Entity> (new Barrel(13,13)));
     entities.push_back(std::shared_ptr<Ammo_Pistol> (new Ammo_Pistol(4,4)));
     entities.push_back(std::shared_ptr<Ammo_Shotgun> (new Ammo_Shotgun(5,5)));
+    entities.push_back(std::shared_ptr<Hamburger> (new Hamburger(6,6)));
+    entities.push_back(std::shared_ptr<Soda> (new Soda(7,7)));
     
     enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,10)));
     enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,9)));

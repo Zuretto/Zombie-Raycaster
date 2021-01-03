@@ -110,3 +110,43 @@ void Ammo_Pistol::onApproach(Player *player){
         this->couldDelete = 1;
     }
 }
+
+Hamburger::Hamburger(double xPos, double yPos){
+    posX = xPos;
+    posY = yPos;
+    radius = 0.5;
+    couldDelete = 0;
+}
+Hamburger::~Hamburger(){}
+int Hamburger::getType(){
+    return HAMBURGER;
+}
+void Hamburger::onApproach(Player *player){
+    double distance = sqrt(pow(this->getPosX() - player->getPosX(), 2) + pow(this->getPosY() - player->getPosY(), 2));
+    if(distance < player->getRadius() + this->getRadius()){
+        if(player->getCurrentHp() < player->getMaxHp()){
+            player->increaseHp(healthRegen);
+            this->couldDelete = 1;
+        }
+    }
+}
+
+Soda::Soda(double xPos, double yPos){
+    posX = xPos;
+    posY = yPos;
+    radius = 0.5;
+    couldDelete = 0;
+}
+Soda::~Soda(){}
+int Soda::getType(){
+    return SODA;
+}
+void Soda::onApproach(Player *player){
+    double distance = sqrt(pow(this->getPosX() - player->getPosX(), 2) + pow(this->getPosY() - player->getPosY(), 2));
+    if(distance < player->getRadius() + this->getRadius()){
+        if(player->getCurrentHp() < player->getMaxHp()){
+            player->increaseHp(healthRegen);
+            this->couldDelete = 1;
+        }
+    }
+}
