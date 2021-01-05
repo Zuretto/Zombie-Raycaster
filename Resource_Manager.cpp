@@ -1,7 +1,16 @@
 #include "Resource_Manager.hpp"
 #include <iostream>
 Resource_Manager::Resource_Manager(){
-
+    /*
+        1 - wooden plank
+        2 - chiseled stone brick
+        3 - cobblestone
+        4 - cracked stone brick
+        5 - nether brick
+        6 - stone brick
+        7 - stone
+        8 - andesite
+    */
     sf::Image wallImages[8];
         wallImages[0].loadFromFile("data/pics/wooden plank.png");
         wallImages[1].loadFromFile("data/pics/chiseled stone brick.png");
@@ -24,6 +33,7 @@ Resource_Manager::Resource_Manager(){
         entityImages[HAMBURGER].loadFromFile("data/pics/hamburger.png");
         entityImages[PILLAR].loadFromFile("data/pics/pillar.png");
         entityImages[SODA].loadFromFile("data/pics/soda.png");
+        entityImages[FIREBALL].loadFromFile("data/pics/fireball.png");
     for (int iType = 0; iType < ENTITY_TYPES_NUMBER; iType++)
         for(int jStripe = 0; jStripe < entityWidth; jStripe++)
             entityTexturesPx[iType][jStripe].loadFromImage(entityImages[iType], sf::IntRect(jStripe, 0, 1, entityHeight));
@@ -32,6 +42,7 @@ Resource_Manager::Resource_Manager(){
         enemyImages[ENEMY].loadFromFile("data/pics/blank_enemy.png");
         enemyImages[ZOMBIE].loadFromFile("data/pics/zombie.png");
         enemyImages[SKELETON].loadFromFile("data/pics/skeleton.png");
+        enemyImages[FIRE_WIZARD].loadFromFile("data/pics/fire_wizard.png");
     for(int type = 0; type < ENEMY_TYPES_NUMBER; type++){
         for(int state = 0; state < ENEMY_STATES_NUMBER; state++){
             for(int stripe = 0; stripe < enemyWidth; stripe++){
@@ -45,12 +56,7 @@ Resource_Manager::Resource_Manager(){
         weaponImages[FIST].loadFromFile("data/pics/fist.png");
         weaponImages[PISTOL].loadFromFile("data/pics/pistol.png");
         weaponImages[SHOTGUN].loadFromFile("data/pics/shotgun.png");
-    /*
-    weaponTextures[PISTOL][DRAWN].loadFromImage(weaponImages[PISTOL], sf::IntRect(0, 0, 128, 128));
-    weaponTextures[PISTOL][SHOT1].loadFromImage(weaponImages[PISTOL], sf::IntRect(128, 0, 128, 128));
-    weaponTextures[PISTOL][SHOT2].loadFromImage(weaponImages[PISTOL], sf::IntRect(256, 0, 128, 128));
-    weaponTextures[PISTOL][SHOT3].loadFromImage(weaponImages[PISTOL], sf::IntRect(384, 0, 128, 128));
-    */
+
     for(int i = 0; i < WEAPON_TYPES_NUMBER; i++){
         for(int j = 0; j < WEAPON_STATES_NUMBER; j++){
             weaponTextures[i][j].loadFromImage(weaponImages[i], sf::IntRect(j * weaponWidth, 0, weaponWidth, weaponHeight));
@@ -58,13 +64,10 @@ Resource_Manager::Resource_Manager(){
     }
 
     gameUIFont.loadFromFile("data/fonts/dum1.ttf");
-    
-    //for(int iType = 0; iType < WEAPON_TYPES_NUMBER; iType++){
-    //    for(int jState = 0; jState < WEAPON_STATES_NUMBER; jState++){
-    //        std::cout << jState * weaponWidth << std::endl;
-    //        weaponTextures[iType][jState].loadFromImage(enemyImages[iType], sf::IntRect(jState * weaponWidth, 0, weaponWidth, weaponHeight));
-    //    }
-    //}
+    menuUIFont.loadFromFile("data/fonts/FredokaOne-Regular.ttf");
+}
+Resource_Manager::~Resource_Manager(){
+    //std::cout << "Deleted resource manager." << std::endl;
 }
 
 /*

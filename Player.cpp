@@ -12,7 +12,7 @@ Player::Player(double xpos, double ypos, double xdir, double ydir, double viewAn
     posX = xpos;
     posY = ypos;
     moveSpeed = 10;
-    rotationSpeed = 10;
+    rotationSpeed = 5;
     dirX = xdir;
     dirY = ydir;
     planeX = dirX * cos(-viewAngle) - dirY * sin(-viewAngle);
@@ -67,7 +67,7 @@ void Player::increaseAmmo(int weapon_type, int amount){
 }
 
 Player::~Player(){
-    std::cout<<"aaaaaaaaa";
+    //std::cout << "deleted player." << std::endl;
 }
 int Player::getWeaponState(){
     return weapons[drawnWeapon]->calculateState();

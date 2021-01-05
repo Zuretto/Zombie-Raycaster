@@ -11,8 +11,10 @@ private:
     sf::Texture enemyTexturesPx[ENEMY_TYPES_NUMBER][ENEMY_STATES_NUMBER][enemyWidth];
     sf::Texture weaponTextures[WEAPON_TYPES_NUMBER][WEAPON_STATES_NUMBER];
     sf::Font    gameUIFont;
+    sf::Font    menuUIFont;
 public:
     Resource_Manager();
+    ~Resource_Manager();
     /* 
     sf::Texture *getWallTexture(int type, int stripe);
     sf::Texture *getEntityTexture(int type, int stripe);
@@ -20,4 +22,5 @@ public:
     sf::Texture *getWeaponTexture(int type, int state);
     */
     friend class Game;
+    friend class Menu;
 };

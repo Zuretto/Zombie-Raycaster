@@ -15,7 +15,7 @@ Map::Map(std::string fileName){
         std::cerr << "Failed to load map file " << fileName;
     }
     std::string str;
-    while (std::getline(fp, str)){
+    while (std::getline(fp, str) && str != "OBJECTS_LOADING:"){
         std::stringstream sstream(str);
         std::vector<int> temp_vector;
         int temp_int;
@@ -28,5 +28,6 @@ Map::Map(std::string fileName){
     fp.close();
 }
 Map::~Map(){
-    std::cout << "hej" << std::endl;
+    //std::cout << "deleted Map" << std::endl;
+    this->map_vector.clear();
 }
