@@ -2,7 +2,7 @@
 #include <iostream>
 Entity::Entity(){}
 Entity::~Entity(){
-    std::cout << "ended life of Entity" << std::endl;
+    //std::cout << "deleted an Entity" << std::endl;
 }
 int Entity::getType(){
     return ENTITY;
@@ -20,10 +20,11 @@ void Entity::onApproach(Player *player){}
 bool Entity::canBeDeleted(){
     return couldDelete;
 }
+
 Barrel::Barrel(double xPos, double yPos){
     posX = xPos;
     posY = yPos;
-    radius = 0.5;
+    radius = 0.35;
     xVelocity = 0;
     yVelocity = 0;
     couldDelete = 0;
@@ -33,7 +34,6 @@ Barrel::~Barrel(){
 int Barrel::getType(){
     return BARREL;
 }
-
 void Barrel::onApproach(Player *player){
     double distance = sqrt(pow(this->getPosX() - player->getPosX(), 2) + pow(this->getPosY() - player->getPosY(), 2));
     if(distance < player->getRadius() + this->getRadius()){
@@ -41,7 +41,6 @@ void Barrel::onApproach(Player *player){
         yVelocity = player->getMoveSpeed() * player->getdirY();
     }
 }
-
 void Barrel::onUpdate(sf::Time deltaT, Map *map){
     auto map_vect = map->getMapVector();
     
@@ -149,4 +148,37 @@ void Soda::onApproach(Player *player){
             this->couldDelete = 1;
         }
     }
+}
+
+Fireball::Fireball(double xPos, double yPos, double dirX, double dirY){
+    posX = xPos;
+    posY = yPos;
+    radius = 0.5;
+    xVelocity = dirX * moveSpeed;
+    yVelocity = dirY * moveSpeed;
+    couldDelete = 0;
+}
+Fireball::~Fireball(){}
+int Fireball::getType(){
+    return FIREBALL;
+}
+void Fireball::onApproach(Player *player){
+    double distance = sqrt(pow(this->getPosX() - player->getPosX(), 2) + pow(this->getPosY() - player->getPosY(), 2));
+    if(distance < player->getRadius() + this->getRadius()){
+        player->decreaseHp(this->damage);
+        couldDelete = 1;
+    }
+}
+void Fireball::onUpdate(sf::Time deltaT, Map *map){
+    auto map_vect = map->getMapVector();
+    double xRadius = -radius * ((xVelocity < 0) - (0 < xVelocity));
+    double yRadius = -radius * ((yVelocity < 0) - (0 < yVelocity));
+    double futureX = posX + xRadius + xVelocity * deltaT.asSeconds();
+    double futureY = posY + yRadius + yVelocity * deltaT.asSeconds();
+
+    if(map_vect[int(futureX)][int(posY + yRadius)] > 0) couldDelete = 1;
+    if(map_vect[int(posX + xRadius)][int(futureY)] > 0) couldDelete = 1;
+
+    this->posX += xVelocity * deltaT.asSeconds();
+    this->posY += yVelocity * deltaT.asSeconds();
 }

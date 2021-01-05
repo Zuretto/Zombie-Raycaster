@@ -18,9 +18,8 @@ public:
     double getPosY() const;
     bool   canBeDeleted();
     double getRadius();
-    virtual void onApproach(Player *player); //checks if Player is close enough and then does sth with that information
+    virtual void onApproach(Player *player);                           //checks if Player is close enough and then does sth with that information
     virtual void onUpdate(sf::Time deltaT, Map *map){}                 //performs onUpdate actions like moving in some direction (or nothing)
-    //virtual void onUpdateEntity();
 };
 
 class Barrel : public Entity{
@@ -82,5 +81,19 @@ public:
     ~Soda();
     int getType() override;
     void onApproach(Player *player) override;
+};
+
+class Fireball : public Entity{
+private:
+    static constexpr double moveSpeed = 2;
+    static constexpr double damage =   20;
+    double xVelocity;
+    double yVelocity;
+public:
+    Fireball(double posX, double posY, double dirX, double dirY);
+    ~Fireball();
+    int getType() override;
+    void onApproach(Player *player) override;
+    void onUpdate(sf::Time deltaT, Map *map) override;
 };
 
