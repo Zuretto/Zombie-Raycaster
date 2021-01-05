@@ -13,6 +13,7 @@
                 "Entity.cpp",
                 "Weapon.cpp",
                 "Enemy.cpp",
+                "Menu.cpp",
                 "Resource_Manager.cpp",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",

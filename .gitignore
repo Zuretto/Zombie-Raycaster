@@ -3,3 +3,5 @@ thrash.cpp
 .vscode/*
 *.jp2
 *.xcf
+*.dll
+*.zip
