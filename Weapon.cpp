@@ -1,7 +1,7 @@
 #include "Weapon.hpp"
 Weapon::Weapon(){}
 Weapon::~Weapon(){
-    std::cout << "Deleted Weapon" << std::endl;
+    //std::cout << "Deleted Weapon" << std::endl;
 }
 int Weapon::getType(){
     return WEAPON;
@@ -16,9 +16,9 @@ int Weapon::getAmmo(){
     return ammo;
 }
 void Weapon::increaseAmmo(int amount){
-    std::cout << this->ammo << std::endl;
-    std::cout << amount << std::endl;
-    std::cout << this->ammo << " " << amount << std::endl;
+    //std::cout << this->ammo << std::endl;
+    //std::cout << amount << std::endl;
+    //std::cout << this->ammo << " " << amount << std::endl;
     this->ammo += amount;
 }
 void Weapon::performShoot(Player *player, Map *worldMap, std::vector <std::shared_ptr<Enemy>> &enemies){
@@ -36,7 +36,7 @@ void Weapon::performShoot(Player *player, Map *worldMap, std::vector <std::share
             for(auto enemy : enemies){
                 if(sqrt(pow(enemy->getPosX() - posX, 2) + pow(enemy->getPosY() - posY, 2)) < enemy->getRadius() && enemy->getHp() > 0){
                     enemy->lowerHp(damage);
-                    std::cout << enemy->getHp() << std::endl;
+                    //std::cout << enemy->getHp() << std::endl;
                     hitEnemy = 1;
                     break;
                 }
@@ -72,7 +72,7 @@ int Weapon::calculateState(){
 Pistol::Pistol(){
     ammo = 10;
     damage = 40;
-    range = 20;
+    range = 40;
     shotCooldown = 0.3;
     weaponClock.restart();
 }
@@ -83,7 +83,7 @@ int Pistol::getType(){
 Shotgun::Shotgun(){
     ammo = 10;
     damage = 10;
-    range = 10;
+    range = 20;
     shotCooldown = 1;
     weaponClock.restart();
 }
@@ -111,7 +111,7 @@ void Shotgun::performShoot(Player *player, Map *worldMap, std::vector <std::shar
                 for(auto enemy : enemies){
                     if(sqrt(pow(enemy->getPosX() - posX, 2) + pow(enemy->getPosY() - posY, 2)) < enemy->getRadius() && enemy->getHp() > 0){
                         enemy->lowerHp(damage);
-                        std::cout << enemy->getHp() << std::endl;
+                        //std::cout << enemy->getHp() << std::endl;
                         hitEnemy = 1;
                         break;
                     }

@@ -35,7 +35,7 @@ public:
 
 class Shotgun : public Weapon{
 private:
-    static constexpr double shotAngle = M_PI / 18; //angle of shot, M_PI/18 is 10 degrees.
+    static constexpr double shotAngle = M_PI / 18 / 2; //angle of shot, M_PI/18 / 2 is 5 degrees.
     static constexpr int    pelletNumber = 10;     //amount of pellets in one shot
 public:
     Shotgun();
