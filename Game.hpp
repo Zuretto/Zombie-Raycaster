@@ -30,18 +30,15 @@ private:
                 >=  pow(b->getPosX() - structPlayer->getPosX(), 2) + pow(b->getPosY() - structPlayer->getPosY(), 2);
         }
     }spriteComp;
-
     Player *player;
     Map *worldMap;
     Resource_Manager *resManager;
     std::vector <std::shared_ptr<Entity>> entities;
     std::vector <std::shared_ptr<Enemy>> enemies;
 
-    //sf::Clock weaponClock;
+    void loadObjectsFromFile(std::string fileName);
     double ZBuffer[casterWidth]; //buffer used to draw sprites, contains perpWallDists for each x
-    
-public:
-    Game(Player* player);
+    bool checkIfAllEnemiesAreDead();
     void drawScene(sf::RenderTarget & target);
     void drawEntity(sf::RenderTarget &target, std::shared_ptr<Entity> &entity);
     void drawEnemy(sf::RenderTarget &target, std::shared_ptr<Enemy> &enemy);
@@ -50,13 +47,16 @@ public:
     void drawHealth(sf::RenderTarget &target);
     void drawAmmo(sf::RenderTarget &target);
     void drawUI(sf::RenderTarget &target);
-    void setWeaponState(int state);
-    void onUpdate(sf::Time deltaT);
-    void handlePlayerEntitiesApproach();
+    //void handlePlayerEntitiesApproach();
     void updateEntities(sf::Time deltaT);
-    int getWeaponState();
+    void updateEnemies(sf::Time deltaT);
+    //void setWeaponState(int state);
 
-
-
-    
+public:
+    Game();
+    Game(std::string fileName);
+    void handleDrawing(sf::RenderTarget &target);
+    void onUpdate(sf::Time deltaT);
+    int checkGameState();
+    ~Game();
 };

@@ -1,29 +1,114 @@
 #include "Game.hpp"
-Game::Game(Player* player){
-    spriteComp.structPlayer = player;
-    this->player = player;
-    worldMap = new Map("data/maps/square.map");
+Game::Game(){
+}
+Game::Game(std::string fileName){
+    worldMap = new Map(fileName);
     resManager = new Resource_Manager;
 
-    entities.push_back(std::shared_ptr<Entity> (new Barrel(11,13)));
-    entities.push_back(std::shared_ptr<Entity> (new Barrel(12,13)));
-    entities.push_back(std::shared_ptr<Entity> (new Pillar(3,3)));
-    entities.push_back(std::shared_ptr<Entity> (new Barrel(13,13)));
-    entities.push_back(std::shared_ptr<Ammo_Pistol> (new Ammo_Pistol(4,4)));
-    entities.push_back(std::shared_ptr<Ammo_Shotgun> (new Ammo_Shotgun(5,5)));
-    entities.push_back(std::shared_ptr<Hamburger> (new Hamburger(6,6)));
-    entities.push_back(std::shared_ptr<Soda> (new Soda(7,7)));
-    
-    enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,10)));
-    enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,9)));
-    enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,8)));
-    enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,7)));
-    enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,6)));
-    enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,5)));
-    enemies.push_back(std::shared_ptr<Enemy> (new Zombie(10,4)));
+    //entities.push_back(std::shared_ptr<Barrel> (new Barrel(11,13)));
+    //entities.push_back(std::shared_ptr<Barrel> (new Barrel(12,13)));
+    //entities.push_back(std::shared_ptr<Pillar> (new Pillar(3,3)));
+    //entities.push_back(std::shared_ptr<Barrel> (new Barrel(13,13)));
+    //entities.push_back(std::shared_ptr<Ammo_Pistol> (new Ammo_Pistol(4,4)));
+    //entities.push_back(std::shared_ptr<Ammo_Shotgun> (new Ammo_Shotgun(5,5)));
+    //entities.push_back(std::shared_ptr<Hamburger> (new Hamburger(6,6)));
+    //entities.push_back(std::shared_ptr<Soda> (new Soda(7,7)));
+    //entities.push_back(std::shared_ptr<Fireball> (new Fireball(10, 10, 0, 1)));
+
+    //enemies.push_back(std::shared_ptr<FireWizard> (new FireWizard(4,4)));
+    //enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(3,3)));
+    //enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,9)));
+    //enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,8)));
+    //enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,7)));
+    //enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,6)));
+    //enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(10,5)));
+    //enemies.push_back(std::shared_ptr<Enemy> (new Zombie(10,4)));
+
+    loadObjectsFromFile(fileName);
+    spriteComp.structPlayer = player;
 
 }
+void Game::loadObjectsFromFile(std::string fileName){
+    std::ifstream fp(fileName);
+    if(!fp){
+        std::cerr << "Failed to load map file " << fileName;
+    }
+    std::string strbuf;
+    while (std::getline(fp, strbuf) && strbuf != "OBJECTS_LOADING:"){}
+    while(std::getline(fp, strbuf)){
+        std::stringstream sstream(strbuf);
+        std::string objectName; sstream >> objectName;
+        if(objectName == "PLAYER"){
+            double posX, posY, dirX, dirY;
+            sstream >> posY;
+            sstream >> posX;
+            sstream >> dirY;
+            sstream >> dirX;
+            player = new Player(posX, posY, dirX, dirY, M_PI/2);
+        }
+        else if(objectName == "ZOMBIE"){
+            double posX, posY;
+            sstream >> posY;
+            sstream >> posX;
+            enemies.push_back(std::shared_ptr<Enemy> (new Zombie(posX, posY)));
+        }
+        else if(objectName == "SKELETON"){
+            double posX, posY;
+            sstream >> posY;
+            sstream >> posX;
+            enemies.push_back(std::shared_ptr<Enemy> (new Skeleton(posX, posY)));
+        }
+        else if(objectName == "FIRE_WIZARD"){
+            double posX, posY;
+            sstream >> posY;
+            sstream >> posX;
+            enemies.push_back(std::shared_ptr<Enemy> (new FireWizard(posX, posY)));
+        }
+        else if(objectName == "BARREL"){
+            double posX, posY;
+            sstream >> posY;
+            sstream >> posX;
+            entities.push_back(std::shared_ptr<Barrel>(new Barrel(posX, posY)));
+        }
+        else if(objectName == "PILLAR"){
+            double posX, posY;
+            sstream >> posY;
+            sstream >> posX;
+            entities.push_back(std::shared_ptr<Pillar>(new Pillar(posX, posY)));
+        }
+        else if(objectName == "AMMO_PISTOL"){
+            double posX, posY;
+            sstream >> posY;
+            sstream >> posX;
+            entities.push_back(std::shared_ptr<Ammo_Pistol>(new Ammo_Pistol(posX, posY)));
+        }
+        else if(objectName == "AMMO_SHOTGUN"){
+            double posX, posY;
+            sstream >> posY;
+            sstream >> posX;
+            entities.push_back(std::shared_ptr<Ammo_Shotgun>(new Ammo_Shotgun(posX, posY)));
+        }
+        else if(objectName == "SODA"){
+            double posX, posY;
+            sstream >> posY;
+            sstream >> posX;
+            entities.push_back(std::shared_ptr<Soda>(new Soda(posX, posY)));
+        }
+        else if(objectName == "HAMBURGER"){
+            double posX, posY;
+            sstream >> posY;
+            sstream >> posX;
+            entities.push_back(std::shared_ptr<Hamburger>(new Hamburger(posX, posY)));
+        }
+    }
+}
 
+bool Game::checkIfAllEnemiesAreDead(){
+    for(auto enemy : enemies){
+        if (enemy->getHp() > 0) return false;
+    }
+    return true;
+}
 void Game::drawScene(sf::RenderTarget &target){
     sf::RectangleShape sky(sf::Vector2f(casterWidth, casterHeight / 2));
     sky.setFillColor(sf::Color(108, 158, 222));
@@ -250,15 +335,16 @@ void Game::drawUI(sf::RenderTarget &target){
     drawAmmo(target);
 }
 
+void Game::handleDrawing(sf::RenderTarget &target){
+    drawScene(target);
+    drawSprites(target);
+    drawUI(target);
+}
 
-void Game::handlePlayerEntitiesApproach(){
+void Game::updateEntities(sf::Time deltaT){
     for(auto i : entities){
         i->onApproach(player);
     }
-}
-
-
-void Game::updateEntities(sf::Time deltaT){
     for(auto i : entities){
         i->onUpdate(deltaT, worldMap);
     }
@@ -274,17 +360,24 @@ void Game::updateEntities(sf::Time deltaT){
         }
     }
 }
+void Game::updateEnemies(sf::Time deltaT){
+    for(int i = 0; i < enemies.size(); i++){
+        std::vector <std::shared_ptr<Enemy>> enemies_without_i = enemies;
+        enemies_without_i.erase(enemies_without_i.begin() + i);
+        enemies[i]->handleLogic(deltaT, player, worldMap, enemies_without_i, entities);
+    }
+}
 void Game::onUpdate(sf::Time deltaT){
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)){
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::W)){
             player->forward(deltaT, worldMap, entities);
         }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)){
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S)){
             player->backward(deltaT, worldMap, entities);
         }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)){
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D)){
             player->rotateRight(deltaT, worldMap);
         }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)){
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A)){
             player->rotateLeft(deltaT, worldMap);
         }
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)){
@@ -296,15 +389,27 @@ void Game::onUpdate(sf::Time deltaT){
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)){
         player->handleWeaponSwap(SHOTGUN);
     }
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Left)){
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Space)){
         player->performShoot(worldMap, enemies);
     }
-
-
-
-    for(int i = 0; i < enemies.size(); i++){
-        enemies[i]->moveTowardsPlayer(deltaT, player);
-    }
-    handlePlayerEntitiesApproach();
+    //handlePlayerEntitiesApproach();
     updateEntities(deltaT);
+    updateEnemies(deltaT);
+}
+
+
+int Game::checkGameState(){
+    if(checkIfAllEnemiesAreDead() == true) return WON;
+    else if(player->getCurrentHp() < 0) return LOST;
+    else return IN_GAME;
+}
+Game::~Game(){
+    delete player;
+    player = nullptr;
+    delete worldMap;
+    worldMap = nullptr;
+    delete resManager;
+    resManager = nullptr;
+    entities.clear();
+    enemies.clear();
 }
