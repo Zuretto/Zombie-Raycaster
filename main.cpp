@@ -16,7 +16,3 @@ int main(){
     return 0;
 }
 
-/*
- ! to-do list:
-    MENU and Cmake
-*/
