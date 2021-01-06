@@ -23,14 +23,6 @@
                 "-lsfml-audio",
                 "-lsfml-window",
                 "-lsfml-system",
-                //"-IC:\\GLFW\\include",
-                //"-LC:\\GLFW\\lib",
-                //"-lglfw3",
-                //"-lGLU",
-                //"-lGL"
-                //"-lopengl32g++"
-                
-
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
