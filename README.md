@@ -1,4 +1,5 @@
 # Zombie-Raycaster
+I am Mikołaj Żurawski, second year IT student. My index number is 145422. <br/>
 The goal of the project was to develop a simple first-person-shooter game using Ray Tracing technology. The game has few features, like:
 * reading map from the file
 * reading player and objects positions from the file
